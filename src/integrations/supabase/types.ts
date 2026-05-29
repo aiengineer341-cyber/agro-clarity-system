@@ -14,16 +14,179 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      detections: {
+        Row: {
+          confidence: number
+          created_at: string
+          crop: string
+          disease: string
+          farm_id: string | null
+          gps: string | null
+          id: string
+          image_url: string | null
+          model: string | null
+          prevention: string | null
+          severity: string
+          symptoms: string | null
+          treatment: string | null
+          urgency: string | null
+          user_id: string
+        }
+        Insert: {
+          confidence?: number
+          created_at?: string
+          crop: string
+          disease: string
+          farm_id?: string | null
+          gps?: string | null
+          id?: string
+          image_url?: string | null
+          model?: string | null
+          prevention?: string | null
+          severity: string
+          symptoms?: string | null
+          treatment?: string | null
+          urgency?: string | null
+          user_id: string
+        }
+        Update: {
+          confidence?: number
+          created_at?: string
+          crop?: string
+          disease?: string
+          farm_id?: string | null
+          gps?: string | null
+          id?: string
+          image_url?: string | null
+          model?: string | null
+          prevention?: string | null
+          severity?: string
+          symptoms?: string | null
+          treatment?: string | null
+          urgency?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "detections_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "farms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      disease_docs: {
+        Row: {
+          content: string
+          created_at: string
+          crop: string | null
+          id: string
+          title: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          crop?: string | null
+          id?: string
+          title: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          crop?: string | null
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      farms: {
+        Row: {
+          created_at: string
+          crop_types: string[] | null
+          id: string
+          lat: number | null
+          lng: number | null
+          location: string | null
+          name: string
+          owner_id: string
+        }
+        Insert: {
+          created_at?: string
+          crop_types?: string[] | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          location?: string | null
+          name: string
+          owner_id: string
+        }
+        Update: {
+          created_at?: string
+          crop_types?: string[] | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          location?: string | null
+          name?: string
+          owner_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar: string | null
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          avatar?: string | null
+          created_at?: string
+          id: string
+          name: string
+        }
+        Update: {
+          avatar?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "extension_officer" | "farmer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +313,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "extension_officer", "farmer"],
+    },
   },
 } as const
