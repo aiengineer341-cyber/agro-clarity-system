@@ -19,7 +19,7 @@ export const detectDisease = createServerFn({ method: "POST" })
       .from("disease_docs")
       .select("title,content,crop")
       .or(`crop.eq.${data.crop},crop.is.null`)
-      .limit(6);
+      .limit(12);
 
     const ragText =
       (docs ?? [])
