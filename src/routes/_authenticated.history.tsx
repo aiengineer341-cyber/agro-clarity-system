@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { deleteDetection } from "@/lib/history.functions";
 import { SeverityBadge, UrgencyDot } from "@/components/severity-badge";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
