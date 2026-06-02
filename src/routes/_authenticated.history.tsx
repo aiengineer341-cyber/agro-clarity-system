@@ -23,6 +23,7 @@ function HistoryPage() {
   const [items, setItems] = useState<D[]>([]);
   const [filter, setFilter] = useState<string>("all");
   const [loading, setLoading] = useState(true);
+  const removeFn = useServerFn(deleteDetection);
 
   const load = () => {
     setLoading(true);
@@ -40,11 +41,18 @@ function HistoryPage() {
 
   const filtered = filter === "all" ? items : items.filter((i) => i.severity === filter);
 
-  const del = async (id: string) => {
-    const { error } = await supabase.from("detections").delete().eq("id", id);
-    if (error) return toast.error(error.message);
-    toast.success("Deleted");
-    load();
+  const del = async (d: D) => {
+    if (!window.confirm("Delete this vision record and its stored image?")) return;
+    try {
+      await removeFn({ data: { id: d.id } });
+      setItems((prev) => {
+        if (d.scan_id) return prev.filter((i) => i.scan_id !== d.scan_id);
+        return prev.filter((i) => i.id !== d.id);
+      });
+      toast.success("Deleted");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Delete failed");
+    }
   };
 
   return (
