@@ -99,7 +99,7 @@ function HistoryPage() {
                   <div className="flex items-center gap-3 shrink-0">
                     <SeverityBadge severity={d.severity} />
                     {d.urgency && <UrgencyDot urgency={d.urgency} />}
-                    <button onClick={() => del(d.id)} className="text-muted-foreground hover:text-destructive">
+                    <button onClick={() => del(d)} className="text-muted-foreground hover:text-destructive">
                       <Trash2 className="size-4" />
                     </button>
                   </div>
