@@ -14,6 +14,7 @@ type D = {
   id: string; crop: string; disease: string; severity: string;
   confidence: number; urgency: string | null; treatment: string | null;
   image_url: string | null; created_at: string;
+  rank: number | null; scan_id: string | null;
 };
 
 function HistoryPage() {
@@ -25,8 +26,9 @@ function HistoryPage() {
     setLoading(true);
     supabase
       .from("detections")
-      .select("id,crop,disease,severity,confidence,urgency,treatment,image_url,created_at")
+      .select("id,crop,disease,severity,confidence,urgency,treatment,image_url,created_at,rank,scan_id")
       .order("created_at", { ascending: false })
+      .order("rank", { ascending: true })
       .then(({ data }) => {
         setItems((data as D[]) ?? []);
         setLoading(false);
@@ -79,7 +81,9 @@ function HistoryPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">{d.crop}</p>
+                    <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                      {d.crop}{d.rank ? ` · rank #${d.rank}` : ""}
+                    </p>
                     <h3 className="text-base font-semibold mt-0.5">{d.disease}</h3>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">

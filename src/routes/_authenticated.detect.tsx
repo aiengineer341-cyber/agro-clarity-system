@@ -152,20 +152,43 @@ function DetectPage() {
       setResult(r);
       setExpanded(0);
       const { data: u } = await supabase.auth.getUser();
-      const top = r.predictions?.[0];
-      if (u.user && top) {
-        await supabase.from("detections").insert({
-          user_id: u.user.id,
-          image_url: image,
+      if (u.user && r.predictions?.length) {
+        // 1. Upload image to Supabase Storage (if present) → public URL
+        let imageUrl: string | null = null;
+        if (hasImage && image) {
+          try {
+            const blob = await (await fetch(image)).blob();
+            const ext = (blob.type.split("/")[1] || "jpg").replace("jpeg", "jpg");
+            const path = `${u.user.id}/${Date.now()}_scan.${ext}`;
+            const { error: upErr } = await supabase.storage
+              .from("vision-images")
+              .upload(path, blob, { contentType: blob.type, upsert: false });
+            if (upErr) throw upErr;
+            const { data: pub } = supabase.storage.from("vision-images").getPublicUrl(path);
+            imageUrl = pub.publicUrl;
+          } catch (err) {
+            console.warn("Image upload failed; saving record without image URL", err);
+          }
+        }
+
+        // 2. Persist every ranked prediction grouped under one scan_id
+        const scanId = crypto.randomUUID();
+        const rows = r.predictions.map((p, i) => ({
+          user_id: u.user!.id,
+          scan_id: scanId,
+          rank: i + 1,
+          image_url: imageUrl,
           crop: r.crop || crop,
-          disease: top.disease,
-          severity: top.severity,
-          confidence: top.confidence,
-          symptoms: top.symptoms,
-          treatment: top.treatment,
-          urgency: top.urgency,
-          prevention: top.prevention,
-        });
+          disease: p.disease,
+          severity: p.severity,
+          confidence: p.confidence,
+          symptoms: p.symptoms,
+          treatment: p.treatment,
+          urgency: p.urgency,
+          prevention: p.prevention,
+        }));
+        const { error: insErr } = await supabase.from("detections").insert(rows);
+        if (insErr) throw insErr;
       }
       toast.success("Diagnosis complete");
     } catch (e) {

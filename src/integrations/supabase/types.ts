@@ -26,6 +26,8 @@ export type Database = {
           image_url: string | null
           model: string | null
           prevention: string | null
+          rank: number
+          scan_id: string | null
           severity: string
           symptoms: string | null
           treatment: string | null
@@ -43,6 +45,8 @@ export type Database = {
           image_url?: string | null
           model?: string | null
           prevention?: string | null
+          rank?: number
+          scan_id?: string | null
           severity: string
           symptoms?: string | null
           treatment?: string | null
@@ -60,6 +64,8 @@ export type Database = {
           image_url?: string | null
           model?: string | null
           prevention?: string | null
+          rank?: number
+          scan_id?: string | null
           severity?: string
           symptoms?: string | null
           treatment?: string | null
