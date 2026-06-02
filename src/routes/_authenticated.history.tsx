@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { deleteDetection } from "@/lib/history.functions";
 import { SeverityBadge, UrgencyDot } from "@/components/severity-badge";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -21,6 +23,7 @@ function HistoryPage() {
   const [items, setItems] = useState<D[]>([]);
   const [filter, setFilter] = useState<string>("all");
   const [loading, setLoading] = useState(true);
+  const removeFn = useServerFn(deleteDetection);
 
   const load = () => {
     setLoading(true);
@@ -38,11 +41,18 @@ function HistoryPage() {
 
   const filtered = filter === "all" ? items : items.filter((i) => i.severity === filter);
 
-  const del = async (id: string) => {
-    const { error } = await supabase.from("detections").delete().eq("id", id);
-    if (error) return toast.error(error.message);
-    toast.success("Deleted");
-    load();
+  const del = async (d: D) => {
+    if (!window.confirm("Delete this vision record and its stored image?")) return;
+    try {
+      await removeFn({ data: { id: d.id } });
+      setItems((prev) => {
+        if (d.scan_id) return prev.filter((i) => i.scan_id !== d.scan_id);
+        return prev.filter((i) => i.id !== d.id);
+      });
+      toast.success("Deleted");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Delete failed");
+    }
   };
 
   return (
@@ -89,7 +99,7 @@ function HistoryPage() {
                   <div className="flex items-center gap-3 shrink-0">
                     <SeverityBadge severity={d.severity} />
                     {d.urgency && <UrgencyDot urgency={d.urgency} />}
-                    <button onClick={() => del(d.id)} className="text-muted-foreground hover:text-destructive">
+                    <button onClick={() => del(d)} className="text-muted-foreground hover:text-destructive">
                       <Trash2 className="size-4" />
                     </button>
                   </div>
