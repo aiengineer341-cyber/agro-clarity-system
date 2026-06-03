@@ -260,7 +260,7 @@ function DetectPage() {
                 className="relative aspect-video w-full rounded-sm bg-background border border-dashed border-border hover:border-primary/50 transition-colors cursor-pointer overflow-hidden grid place-items-center"
               >
                 {image ? (
-                  <ImagePreview image={image} loading={loading} />
+                  <ImagePreview image={image} loading={loading} crop={crop} />
                 ) : (
                   <div className="text-center space-y-2">
                     <Upload className="size-8 text-muted-foreground mx-auto" />
@@ -283,7 +283,7 @@ function DetectPage() {
               <div className="space-y-3">
                 <div className="relative aspect-video w-full rounded-sm bg-black border border-border overflow-hidden grid place-items-center">
                   {image && !camOn ? (
-                    <ImagePreview image={image} loading={loading} />
+                    <ImagePreview image={image} loading={loading} crop={crop} />
                   ) : (
                     <>
                       <video ref={videoRef} playsInline muted className="absolute inset-0 w-full h-full object-cover" />
