@@ -1,0 +1,7 @@
+# AgroVision AI
+
+> AI-powered plant disease detection and treatment guidance for farmers. Multi-spectral computer vision turns field photos into actionable harvest intelligence.
+
+## Pages
+
+- [Home](/): Overview of AgroVision AI's precision agriculture platform.
