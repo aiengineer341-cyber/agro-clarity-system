@@ -4,7 +4,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { BookOpen } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/knowledge")({
-  head: () => ({ meta: [{ title: "Knowledge Base — AgroVision AI" }] }),
+  head: () => ({
+    meta: [
+      { title: "Agronomy Knowledge Base — AgroVision AI" },
+      { name: "description", content: "Searchable reference library of crop diseases, symptoms, and treatments powering AgroVision's RAG diagnoses." },
+      { property: "og:title", content: "Agronomy Knowledge Base — AgroVision AI" },
+      { property: "og:description", content: "Searchable crop disease reference library powering RAG diagnoses." },
+      { property: "og:url", content: "https://agro-clarity-system.lovable.app/knowledge" },
+    ],
+    links: [{ rel: "canonical", href: "https://agro-clarity-system.lovable.app/knowledge" }],
+  }),
   component: KnowledgePage,
 });
 

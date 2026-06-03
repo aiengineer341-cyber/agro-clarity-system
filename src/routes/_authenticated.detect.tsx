@@ -8,7 +8,16 @@ import { toast } from "sonner";
 import { Upload, ScanLine, Loader2, Camera, Mic, Type, MicOff, X, Video } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/detect")({
-  head: () => ({ meta: [{ title: "Detect — AgroVision AI" }] }),
+  head: () => ({
+    meta: [
+      { title: "Detect Crop Disease — AgroVision AI" },
+      { name: "description", content: "Capture, upload, or describe a crop leaf and get ranked AI disease predictions with severity, urgency, and treatment guidance." },
+      { property: "og:title", content: "Detect Crop Disease — AgroVision AI" },
+      { property: "og:description", content: "Ranked AI disease predictions with severity, urgency, and treatment guidance." },
+      { property: "og:url", content: "https://agro-clarity-system.lovable.app/detect" },
+    ],
+    links: [{ rel: "canonical", href: "https://agro-clarity-system.lovable.app/detect" }],
+  }),
   component: DetectPage,
 });
 

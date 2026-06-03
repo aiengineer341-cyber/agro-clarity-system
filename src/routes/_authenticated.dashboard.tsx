@@ -5,7 +5,16 @@ import { SeverityBadge } from "@/components/severity-badge";
 import { AlertTriangle, ScanLine, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "Monitoring — AgroVision AI" }] }),
+  head: () => ({
+    meta: [
+      { title: "Monitoring Dashboard — AgroVision AI" },
+      { name: "description", content: "Live monitoring of crop disease detections across your fields with severity, urgency, and confidence telemetry." },
+      { property: "og:title", content: "Monitoring Dashboard — AgroVision AI" },
+      { property: "og:description", content: "Live monitoring of crop disease detections with severity and urgency telemetry." },
+      { property: "og:url", content: "https://agro-clarity-system.lovable.app/dashboard" },
+    ],
+    links: [{ rel: "canonical", href: "https://agro-clarity-system.lovable.app/dashboard" }],
+  }),
   component: Dashboard,
 });
 
