@@ -260,7 +260,7 @@ function DetectPage() {
                 className="relative aspect-video w-full rounded-sm bg-background border border-dashed border-border hover:border-primary/50 transition-colors cursor-pointer overflow-hidden grid place-items-center"
               >
                 {image ? (
-                  <ImagePreview image={image} loading={loading} />
+                  <ImagePreview image={image} loading={loading} crop={crop} />
                 ) : (
                   <div className="text-center space-y-2">
                     <Upload className="size-8 text-muted-foreground mx-auto" />
@@ -283,7 +283,7 @@ function DetectPage() {
               <div className="space-y-3">
                 <div className="relative aspect-video w-full rounded-sm bg-black border border-border overflow-hidden grid place-items-center">
                   {image && !camOn ? (
-                    <ImagePreview image={image} loading={loading} />
+                    <ImagePreview image={image} loading={loading} crop={crop} />
                   ) : (
                     <>
                       <video ref={videoRef} playsInline muted className="absolute inset-0 w-full h-full object-cover" />
@@ -413,10 +413,10 @@ function DetectPage() {
   );
 }
 
-function ImagePreview({ image, loading }: { image: string; loading: boolean }) {
+function ImagePreview({ image, loading, crop }: { image: string; loading: boolean; crop?: string }) {
   return (
     <>
-      <img src={image} alt="Crop" className="absolute inset-0 w-full h-full object-cover" />
+      <img src={image} alt={crop ? `Diseased ${crop} leaf` : "Uploaded crop leaf"} className="absolute inset-0 w-full h-full object-cover" />
       <div className="absolute inset-4 border border-primary/30">
         <div className="absolute -top-1 -left-1 size-3 border-l-2 border-t-2 border-primary" />
         <div className="absolute -top-1 -right-1 size-3 border-r-2 border-t-2 border-primary" />
