@@ -77,6 +77,7 @@ function HistoryPage() {
         </div>
       </header>
 
+      <h2 className="text-sm font-semibold text-foreground">Recent Activity</h2>
       <div className="rounded-sm border border-border bg-card divide-y divide-border">
         {loading ? (
           <div className="p-10 text-center text-sm text-muted-foreground">Loading…</div>
@@ -86,7 +87,7 @@ function HistoryPage() {
           filtered.map((d) => (
             <div key={d.id} className="p-5 flex items-start gap-5">
               <div className="size-16 shrink-0 rounded-sm bg-background border border-border overflow-hidden">
-                {d.image_url && <img src={d.image_url} alt={d.crop} className="w-full h-full object-cover" />}
+                {d.image_url && <img src={d.image_url} alt={`Diseased ${d.crop} leaf`} className="w-full h-full object-cover" />}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-4">
@@ -99,7 +100,7 @@ function HistoryPage() {
                   <div className="flex items-center gap-3 shrink-0">
                     <SeverityBadge severity={d.severity} />
                     {d.urgency && <UrgencyDot urgency={d.urgency} />}
-                    <button onClick={() => del(d)} className="text-muted-foreground hover:text-destructive">
+                    <button onClick={() => del(d)} aria-label="Delete detection" className="text-muted-foreground hover:text-destructive">
                       <Trash2 className="size-4" />
                     </button>
                   </div>
