@@ -8,7 +8,16 @@ import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/history")({
-  head: () => ({ meta: [{ title: "Analysis — AgroVision AI" }] }),
+  head: () => ({
+    meta: [
+      { title: "Detection History — AgroVision AI" },
+      { name: "description", content: "Review past crop disease scans with ranked predictions, confidence scores, severity, and treatment notes." },
+      { property: "og:title", content: "Detection History — AgroVision AI" },
+      { property: "og:description", content: "Past crop disease scans with ranked predictions and confidence scores." },
+      { property: "og:url", content: "https://agro-clarity-system.lovable.app/history" },
+    ],
+    links: [{ rel: "canonical", href: "https://agro-clarity-system.lovable.app/history" }],
+  }),
   component: HistoryPage,
 });
 

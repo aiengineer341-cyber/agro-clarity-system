@@ -9,6 +9,45 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "AI-powered plant disease detection. Diagnose crop diseases in seconds with multi-spectral vision and an agronomy knowledge base." },
       { property: "og:title", content: "AgroVision AI" },
       { property: "og:description", content: "Diagnose crop diseases in seconds with AI vision." },
+      { property: "og:url", content: "https://agro-clarity-system.lovable.app/" },
+      { property: "og:type", content: "website" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://agro-clarity-system.lovable.app/" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "AgroVision AI",
+          url: "https://agro-clarity-system.lovable.app/",
+          logo: "https://agro-clarity-system.lovable.app/favicon.ico",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "AgroVision AI",
+          url: "https://agro-clarity-system.lovable.app/",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: "AgroVision AI",
+          applicationCategory: "BusinessApplication",
+          operatingSystem: "Web",
+          description: "AI-powered plant disease detection and treatment guidance for farmers.",
+          url: "https://agro-clarity-system.lovable.app/",
+          offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+        }),
+      },
     ],
   }),
   component: Landing,
