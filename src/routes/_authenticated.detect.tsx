@@ -413,10 +413,10 @@ function DetectPage() {
   );
 }
 
-function ImagePreview({ image, loading }: { image: string; loading: boolean }) {
+function ImagePreview({ image, loading, crop }: { image: string; loading: boolean; crop?: string }) {
   return (
     <>
-      <img src={image} alt="Crop" className="absolute inset-0 w-full h-full object-cover" />
+      <img src={image} alt={crop ? `Diseased ${crop} leaf` : "Uploaded crop leaf"} className="absolute inset-0 w-full h-full object-cover" />
       <div className="absolute inset-4 border border-primary/30">
         <div className="absolute -top-1 -left-1 size-3 border-l-2 border-t-2 border-primary" />
         <div className="absolute -top-1 -right-1 size-3 border-r-2 border-t-2 border-primary" />
