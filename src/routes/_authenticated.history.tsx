@@ -6,6 +6,7 @@ import { deleteDetection } from "@/lib/history.functions";
 import { SeverityBadge, UrgencyDot } from "@/components/severity-badge";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import diseaseLeaf from "@/assets/disease-leaf.jpg";
 
 export const Route = createFileRoute("/_authenticated/history")({
   head: () => ({
@@ -65,11 +66,11 @@ function HistoryPage() {
   };
 
   return (
-    <main className="max-w-7xl mx-auto px-6 py-10 space-y-6">
+    <main className="max-w-7xl mx-auto px-6 py-10 space-y-6 animate-fade-in">
       <header className="flex items-end justify-between flex-wrap gap-4">
         <div>
-          <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">Operations / Analysis</p>
-          <h1 className="text-3xl font-bold tracking-tight mt-1">Detection History</h1>
+          <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">Operations / Records</p>
+          <h1 className="text-3xl font-bold tracking-tight mt-1">Detection Records</h1>
         </div>
         <div className="flex gap-1.5">
           {["all", "healthy", "mild", "moderate", "severe"].map((f) => (
@@ -93,10 +94,18 @@ function HistoryPage() {
         ) : filtered.length === 0 ? (
           <div className="p-10 text-center text-sm text-muted-foreground">No detections.</div>
         ) : (
-          filtered.map((d) => (
-            <div key={d.id} className="p-5 flex items-start gap-5">
+          filtered.map((d, i) => (
+            <div
+              key={d.id}
+              style={{ animationDelay: `${i * 40}ms` }}
+              className="p-5 flex items-start gap-5 hover:bg-background/40 transition-colors animate-slide-up"
+            >
               <div className="size-16 shrink-0 rounded-sm bg-background border border-border overflow-hidden">
-                {d.image_url && <img src={d.image_url} alt={`Diseased ${d.crop} leaf`} className="w-full h-full object-cover" />}
+                <img
+                  src={d.image_url || diseaseLeaf}
+                  alt={`Diseased ${d.crop} leaf`}
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-4">
