@@ -6,7 +6,8 @@ import { LogOut } from "lucide-react";
 const items = [
   { to: "/dashboard", label: "Monitoring" },
   { to: "/detect", label: "Detect" },
-  { to: "/history", label: "Analysis" },
+  { to: "/analysis", label: "Analysis" },
+  { to: "/history", label: "History" },
   { to: "/knowledge", label: "Knowledge" },
 ];
 
