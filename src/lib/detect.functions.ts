@@ -120,5 +120,6 @@ Respond ONLY with a valid JSON object matching this schema:
       crop: parsed.crop || data.crop,
       predictions,
       rag_docs_used: docs?.length ?? 0,
+      model: body.model,
     };
   });
