@@ -19,13 +19,18 @@ export type Database = {
           confidence: number
           created_at: string
           crop: string
+          description: string | null
           disease: string
           farm_id: string | null
           gps: string | null
           id: string
           image_url: string | null
+          input_mode: string | null
+          lat: number | null
+          lng: number | null
           model: string | null
           prevention: string | null
+          rag_docs_used: number | null
           rank: number
           scan_id: string | null
           severity: string
@@ -38,13 +43,18 @@ export type Database = {
           confidence?: number
           created_at?: string
           crop: string
+          description?: string | null
           disease: string
           farm_id?: string | null
           gps?: string | null
           id?: string
           image_url?: string | null
+          input_mode?: string | null
+          lat?: number | null
+          lng?: number | null
           model?: string | null
           prevention?: string | null
+          rag_docs_used?: number | null
           rank?: number
           scan_id?: string | null
           severity: string
@@ -57,13 +67,18 @@ export type Database = {
           confidence?: number
           created_at?: string
           crop?: string
+          description?: string | null
           disease?: string
           farm_id?: string | null
           gps?: string | null
           id?: string
           image_url?: string | null
+          input_mode?: string | null
+          lat?: number | null
+          lng?: number | null
           model?: string | null
           prevention?: string | null
+          rag_docs_used?: number | null
           rank?: number
           scan_id?: string | null
           severity?: string

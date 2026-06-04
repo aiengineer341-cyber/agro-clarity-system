@@ -32,6 +32,7 @@ type Result = {
   crop: string;
   predictions: Prediction[];
   rag_docs_used?: number;
+  model?: string;
 };
 
 type Mode = "upload" | "camera" | "voice" | "text";
@@ -56,6 +57,17 @@ function DetectPage() {
   // Voice (Web Speech API)
   const recogRef = useRef<unknown>(null);
   const [listening, setListening] = useState(false);
+
+  // Best-effort geolocation
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => {},
+      { enableHighAccuracy: false, timeout: 5000, maximumAge: 60_000 },
+    );
+  }, []);
 
   const stopCamera = () => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -195,6 +207,12 @@ function DetectPage() {
           treatment: p.treatment,
           urgency: p.urgency,
           prevention: p.prevention,
+          input_mode: mode,
+          description: hasText ? description.trim() : null,
+          rag_docs_used: r.rag_docs_used ?? null,
+          model: r.model ?? null,
+          lat: coords?.lat ?? null,
+          lng: coords?.lng ?? null,
         }));
         const { error: insErr } = await supabase.from("detections").insert(rows);
         if (insErr) throw insErr;
