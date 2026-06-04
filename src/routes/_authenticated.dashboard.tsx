@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { SeverityBadge } from "@/components/severity-badge";
 import { AlertTriangle, ScanLine, ArrowRight } from "lucide-react";
+import farmerTablet from "@/assets/farmer-tablet.jpg";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -59,24 +60,38 @@ function Dashboard() {
   const recent = det.slice(0, 6);
 
   return (
-    <main className="max-w-7xl mx-auto px-6 py-10 space-y-8">
-      <header className="flex items-end justify-between flex-wrap gap-4">
-        <div>
-          <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
-            Operations / Monitoring
-          </p>
-          <h1 className="text-3xl font-bold tracking-tight mt-1">Field Telemetry</h1>
+    <main className="max-w-7xl mx-auto px-6 py-10 space-y-8 animate-fade-in">
+      <header className="relative overflow-hidden rounded-sm border border-border bg-card animate-slide-up">
+        <img
+          src={farmerTablet}
+          alt="Farmer inspecting crops in the field with a tablet"
+          width={1536}
+          height={1024}
+          loading="lazy"
+          className="absolute inset-0 w-full h-full object-cover opacity-30"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/40" />
+        <div className="relative flex items-end justify-between flex-wrap gap-4 p-6 md:p-8">
+          <div>
+            <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
+              Operations / Monitoring
+            </p>
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mt-1">Field Telemetry</h1>
+            <p className="text-sm text-muted-foreground mt-2 max-w-md">
+              Live pulse of every scan across your plots — severity, urgency, and confidence at a glance.
+            </p>
+          </div>
+          <Link
+            to="/detect"
+            className="px-5 py-3 bg-primary text-primary-foreground font-bold text-sm rounded-sm hover:bg-accent-bright hover:-translate-y-0.5 transition-all inline-flex items-center gap-2"
+          >
+            <ScanLine className="size-4" /> New Detection
+          </Link>
         </div>
-        <Link
-          to="/detect"
-          className="px-5 py-3 bg-primary text-primary-foreground font-bold text-sm rounded-sm hover:bg-accent-bright transition-colors inline-flex items-center gap-2"
-        >
-          <ScanLine className="size-4" /> New Detection
-        </Link>
       </header>
 
       {/* Stat strip */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-px bg-border ring-1 ring-border rounded-sm overflow-hidden">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-px bg-border ring-1 ring-border rounded-sm overflow-hidden animate-slide-up" style={{ animationDelay: "80ms" }}>
         <Stat label="Total Detections" value={String(total).padStart(3, "0")} />
         <Stat label="Severe Cases" value={String(severe).padStart(3, "0")} tone="danger" />
         <Stat label="Moderate" value={String(moderate).padStart(3, "0")} tone="warn" />
@@ -85,7 +100,7 @@ function Dashboard() {
       </div>
 
       {severe > 0 && (
-        <div className="flex items-center justify-between p-4 rounded-sm border border-destructive/30 bg-destructive/5">
+        <div className="flex items-center justify-between p-4 rounded-sm border border-destructive/30 bg-destructive/5 animate-slide-up">
           <div className="flex items-center gap-4">
             <AlertTriangle className="size-5 text-destructive shrink-0" />
             <p className="text-sm font-medium text-foreground">
@@ -102,7 +117,7 @@ function Dashboard() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-slide-up" style={{ animationDelay: "160ms" }}>
         {/* Recent */}
         <section className="lg:col-span-8 space-y-4">
           <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
@@ -114,8 +129,12 @@ function Dashboard() {
             ) : recent.length === 0 ? (
               <EmptyState />
             ) : (
-              recent.map((d) => (
-                <div key={d.id} className="p-4 flex items-center justify-between gap-4">
+              recent.map((d, i) => (
+                <div
+                  key={d.id}
+                  style={{ animationDelay: `${i * 60}ms` }}
+                  className="p-4 flex items-center justify-between gap-4 hover:bg-background/40 transition-colors animate-slide-up"
+                >
                   <div className="min-w-0">
                     <p className="text-sm font-medium truncate">{d.disease}</p>
                     <p className="text-xs text-muted-foreground font-mono mt-0.5">

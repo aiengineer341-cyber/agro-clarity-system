@@ -6,6 +6,7 @@ import {
   PieChart, Pie, Cell, BarChart, Bar, Legend,
 } from "recharts";
 import { ScanLine } from "lucide-react";
+import cropLeaf from "@/assets/crop-leaf-macro.jpg";
 
 export const Route = createFileRoute("/_authenticated/analysis")({
   head: () => ({
@@ -61,20 +62,34 @@ function AnalysisPage() {
   const stats = useMemo(() => computeStats(rows), [rows]);
 
   return (
-    <main className="max-w-7xl mx-auto px-6 py-10 space-y-8">
-      <header className="flex items-end justify-between flex-wrap gap-4">
-        <div>
-          <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
-            Operations / Analysis
-          </p>
-          <h1 className="text-3xl font-bold tracking-tight mt-1">Field Analytics</h1>
+    <main className="max-w-7xl mx-auto px-6 py-10 space-y-8 animate-fade-in">
+      <header className="relative overflow-hidden rounded-sm border border-border bg-card animate-slide-up">
+        <img
+          src={cropLeaf}
+          alt="Macro view of a healthy crop leaf with dew droplets"
+          width={1536}
+          height={1024}
+          loading="lazy"
+          className="absolute inset-0 w-full h-full object-cover opacity-25"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/40" />
+        <div className="relative flex items-end justify-between flex-wrap gap-4 p-6 md:p-8">
+          <div>
+            <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
+              Operations / Analytics
+            </p>
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mt-1">Field Analytics</h1>
+            <p className="text-sm text-muted-foreground mt-2 max-w-md">
+              Trends and distribution across every scan in your field history.
+            </p>
+          </div>
+          <Link
+            to="/detect"
+            className="px-5 py-3 bg-primary text-primary-foreground font-bold text-sm rounded-sm hover:bg-accent-bright hover:-translate-y-0.5 transition-all inline-flex items-center gap-2"
+          >
+            <ScanLine className="size-4" /> New Detection
+          </Link>
         </div>
-        <Link
-          to="/detect"
-          className="px-5 py-3 bg-primary text-primary-foreground font-bold text-sm rounded-sm hover:bg-accent-bright transition-colors inline-flex items-center gap-2"
-        >
-          <ScanLine className="size-4" /> New Detection
-        </Link>
       </header>
 
       {loading ? (
@@ -85,7 +100,7 @@ function AnalysisPage() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-border ring-1 ring-border rounded-sm overflow-hidden">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-border ring-1 ring-border rounded-sm overflow-hidden animate-slide-up" style={{ animationDelay: "80ms" }}>
             <Kpi label="Total Scans" value={String(stats.totalScans).padStart(3, "0")} />
             <Kpi label="Avg Confidence" value={`${stats.avgConfidence}%`} />
             <Kpi label="Severe Rate" value={`${stats.severeRate}%`} tone="danger" />
@@ -181,7 +196,7 @@ function AnalysisPage() {
 
 function Panel({ title, children, className = "" }: { title: string; children: React.ReactNode; className?: string }) {
   return (
-    <section className={`rounded-sm border border-border bg-card p-5 flex flex-col ${className}`}>
+    <section className={`rounded-sm border border-border bg-card p-5 flex flex-col hover:border-primary/30 transition-colors animate-slide-up ${className}`}>
       <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground mb-3">{title}</h2>
       <div className="flex-1 min-h-0">{children}</div>
     </section>

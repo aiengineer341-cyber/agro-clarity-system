@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Logo } from "@/components/logo";
 import { ScanLine, Database, Wifi, ArrowRight } from "lucide-react";
+import heroField from "@/assets/hero-field.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -75,7 +76,7 @@ function Landing() {
 
       <main className="max-w-7xl mx-auto px-6 py-16">
         <section className="grid lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-6 space-y-8">
+          <div className="lg:col-span-6 space-y-8 animate-slide-up">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
@@ -92,32 +93,40 @@ function Landing() {
             <div className="flex items-center gap-4">
               <Link
                 to="/auth"
-                className="px-8 py-4 bg-primary text-primary-foreground font-bold text-sm rounded-sm hover:-translate-y-0.5 transition-transform inline-flex items-center gap-2"
+                className="px-8 py-4 bg-primary text-primary-foreground font-bold text-sm rounded-sm hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/30 transition-all inline-flex items-center gap-2"
               >
                 Initialize System <ArrowRight className="size-4" />
               </Link>
               <Link
                 to="/auth"
-                className="px-8 py-4 border border-border font-bold text-sm rounded-sm hover:bg-card transition-colors"
+                className="px-8 py-4 border border-border font-bold text-sm rounded-sm hover:bg-card hover:border-primary/30 transition-colors"
               >
                 View Dataset
               </Link>
             </div>
           </div>
 
-          <div className="lg:col-span-6">
+          <div className="lg:col-span-6 animate-fade-in" style={{ animationDelay: "120ms" }}>
             <div className="relative">
               <div className="absolute -inset-1 bg-gradient-to-tr from-primary/20 to-transparent blur-2xl opacity-30" />
               <div className="relative bg-card border border-border rounded-xl overflow-hidden shadow-2xl">
-                <div className="relative aspect-video bg-background grid place-items-center overflow-hidden">
-                  <div className="absolute inset-6 border border-primary/20">
+                <div className="relative aspect-video overflow-hidden">
+                  <img
+                    src={heroField}
+                    alt="Aerial view of a healthy green maize crop field at golden hour"
+                    width={1536}
+                    height={1024}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-tr from-background/80 via-background/30 to-transparent" />
+                  <div className="absolute inset-6 border border-primary/30">
                     <div className="absolute -top-1 -left-1 size-3 border-l-2 border-t-2 border-primary" />
                     <div className="absolute -top-1 -right-1 size-3 border-r-2 border-t-2 border-primary" />
                     <div className="absolute -bottom-1 -left-1 size-3 border-b-2 border-l-2 border-primary" />
                     <div className="absolute -bottom-1 -right-1 size-3 border-b-2 border-r-2 border-primary" />
                     <div className="absolute left-0 top-0 h-px w-full bg-primary/40 animate-scan-line" />
                   </div>
-                  <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">Satellite Core Vision Feed</span>
+                  <span className="absolute bottom-3 left-4 text-[10px] font-mono uppercase tracking-[0.2em] text-primary/90 z-10">Live · Field Vision Feed</span>
                 </div>
                 <div className="p-6 grid grid-cols-3 gap-6 bg-background/50 border-t border-border">
                   <Metric label="Hydration Index" value="84.2%" />
@@ -130,21 +139,15 @@ function Landing() {
         </section>
 
         <section className="grid md:grid-cols-3 gap-6 mt-24">
-          <Feature
-            Icon={ScanLine}
-            title="Computer Vision"
-            body="Proprietary neural network identifies pathogens and nutrient deficiencies with sub-second accuracy."
-          />
-          <Feature
-            Icon={Wifi}
-            title="Edge Deployment"
-            body="Runs on low-bandwidth devices. Ensures real-time analysis even in rural zones with weak connectivity."
-          />
-          <Feature
-            Icon={Database}
-            title="Agronomy Knowledge Base"
-            body="RAG over a curated library of disease references. Treatment plans grounded in the field, not hallucinations."
-          />
+          {[
+            { Icon: ScanLine, title: "Computer Vision", body: "Proprietary neural network identifies pathogens and nutrient deficiencies with sub-second accuracy." },
+            { Icon: Wifi, title: "Edge Deployment", body: "Runs on low-bandwidth devices. Ensures real-time analysis even in rural zones with weak connectivity." },
+            { Icon: Database, title: "Agronomy Knowledge Base", body: "RAG over a curated library of disease references. Treatment plans grounded in the field, not hallucinations." },
+          ].map((f, i) => (
+            <div key={f.title} className="animate-slide-up" style={{ animationDelay: `${200 + i * 80}ms` }}>
+              <Feature Icon={f.Icon} title={f.title} body={f.body} />
+            </div>
+          ))}
         </section>
 
         <section className="mt-24 p-1 rounded-sm bg-gradient-to-r from-primary/30 via-border to-primary/30">
@@ -189,8 +192,8 @@ function Metric({ label, value, accent }: { label: string; value: string; accent
 
 function Feature({ Icon, title, body }: { Icon: typeof ScanLine; title: string; body: string }) {
   return (
-    <div className="p-8 bg-card border border-border hover:border-primary/30 transition-colors group rounded-sm">
-      <div className="size-12 rounded-sm bg-background/50 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+    <div className="p-8 bg-card border border-border hover:border-primary/30 hover:-translate-y-1 transition-all duration-300 group rounded-sm h-full">
+      <div className="size-12 rounded-sm bg-background/50 flex items-center justify-center mb-6 group-hover:bg-primary/20 group-hover:scale-110 transition-all">
         <Icon className="size-5 text-primary" />
       </div>
       <h3 className="text-xl font-semibold text-foreground mb-3">{title}</h3>
