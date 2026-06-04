@@ -233,15 +233,15 @@ function DetectPage() {
   ];
 
   return (
-    <main className="max-w-7xl mx-auto px-6 py-10 space-y-8">
-      <header>
+    <main className="max-w-7xl mx-auto px-6 py-10 space-y-8 animate-fade-in">
+      <header className="animate-slide-up">
         <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
           Operations / Detect
         </p>
         <h1 className="text-3xl font-bold tracking-tight mt-1">Field Diagnostic Scanner</h1>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-slide-up" style={{ animationDelay: "80ms" }}>
         {/* Capture */}
         <section className="lg:col-span-7 space-y-4">
           <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
