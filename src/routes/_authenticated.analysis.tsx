@@ -196,7 +196,7 @@ function AnalysisPage() {
 
 function Panel({ title, children, className = "" }: { title: string; children: React.ReactNode; className?: string }) {
   return (
-    <section className={`rounded-sm border border-border bg-card p-5 flex flex-col ${className}`}>
+    <section className={`rounded-sm border border-border bg-card p-5 flex flex-col hover:border-primary/30 transition-colors animate-slide-up ${className}`}>
       <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground mb-3">{title}</h2>
       <div className="flex-1 min-h-0">{children}</div>
     </section>
