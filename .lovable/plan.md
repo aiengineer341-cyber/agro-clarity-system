@@ -1,72 +1,23 @@
+## Detection History & Field Analytics — Explicit Save
 
-## Goal
-Refresh the app's visual layer with real agriculture imagery and tasteful motion, and tighten the navigation so tabs are consistent, mobile-friendly, and free of duplicates.
+### Current behavior
+- `/detect` runs `analyse()` which both calls the AI **and** auto-inserts every ranked prediction into `detections`. There is no user confirmation step.
+- `/dashboard` already computes Total / Severe / Moderate / Healthy / Avg Confidence dynamically from `detections`, and avg confidence is already shown as `%`.
 
-## 1. Navigation restructure (`src/components/top-nav.tsx`)
+### Changes
 
-Current tabs: Monitoring · Detect · Analysis · History · Knowledge — "Analysis" and "History" overlap conceptually and there's no mobile menu.
+**1. `src/routes/_authenticated.detect.tsx` — split analyse vs save**
+- Remove the auto-insert (image upload + `detections.insert`) from `analyse()`. `analyse()` only runs the AI and shows ranked predictions.
+- Add `saved` state and a new `save()` function containing the existing storage upload + `detections.insert` logic (scan_id, rank, image_url, crop, disease, severity, confidence, symptoms, treatment, urgency, prevention, input_mode, description, rag_docs_used, model, lat, lng).
+- Render a **Save Diagnosis** button in the result panel, shown only when `result.predictions.length > 0`. Disabled while saving or after a successful save (becomes "Saved ✓"). Works for every crop (Maize, Tomato, Cassava, Pepper, Plantain, Cocoyam, Potato, Other) — no per-crop branching.
+- Gate by input: must have an image OR a text/voice description (same rule as today). Toast on success/error.
+- Reset `saved` to `false` whenever inputs change or a new analysis runs.
 
-New structure (single source of truth, no duplicates):
-- **Monitoring** → `/dashboard`
-- **Detect** → `/detect`
-- **Analytics** → `/analysis` (charts)
-- **Records** → `/history` (raw list)
-- **Knowledge** → `/knowledge`
+**2. Dashboard / Records / Analytics**
+- No schema or query changes needed. Dashboard stats already derive from `detections` rows; once save is explicit, only confirmed records are counted.
+- Verify `Avg Confidence` continues to render as `XX%` (already does).
 
-Improvements:
-- Sticky header already present — keep `sticky top-0`, add subtle shadow on scroll.
-- Active state: underline indicator that slides between tabs (animated via Tailwind transition on a `::after` bar), plus `text-primary`.
-- Mobile: add a hamburger (`Menu` icon from lucide) that opens a slide-down sheet listing the 5 tabs with fade-in stagger. Use existing `Sheet` shadcn component.
-- Keep "Live" pill + sign-out in the header row.
-
-## 2. Real agriculture imagery
-
-Replace placeholder/abstract visuals with generated photo-real crop & field imagery (stored in `src/assets/` as `.jpg`).
-
-Images to generate (premium model, photo-realistic):
-- `hero-field.jpg` — drone view of a green crop field at golden hour (landing hero, replaces the "scan line" placeholder card).
-- `crop-leaf-macro.jpg` — close-up of a healthy maize leaf with dew (Knowledge page header / Detect empty-state).
-- `farmer-tablet.jpg` — farmer inspecting plants with tablet (Dashboard empty-state / Analytics header).
-- `disease-leaf.jpg` — leaf showing visible disease lesions (Detect page sample / History fallback thumbnail).
-
-Used in:
-- **Landing** (`src/routes/index.tsx`): swap the placeholder "Satellite Core Vision Feed" card for `hero-field.jpg` with overlay metrics + scan-line animation kept on top.
-- **Dashboard** (`_authenticated.dashboard.tsx`): hero strip with `farmer-tablet.jpg`, dark gradient overlay, KPI text on top.
-- **Detect** (`_authenticated.detect.tsx`): empty-state preview uses `crop-leaf-macro.jpg`.
-- **Analytics** (`_authenticated.analysis.tsx`): subtle banner using `crop-leaf-macro.jpg` behind the KPI strip.
-- **Knowledge** (`_authenticated.knowledge.tsx`): header banner with `disease-leaf.jpg`.
-- **History** thumbnails: fallback to `disease-leaf.jpg` when storage image is missing.
-
-## 3. Animation system
-
-Use only the allowed set: fade-in, fade-out, slide-up, slide-down, hover, micro-interactions. No parallax, no heavy scroll effects.
-
-Add to `src/styles.css` (extend existing keyframes):
-- `@keyframes slide-up` (translateY 12px → 0, opacity 0 → 1)
-- `@keyframes slide-down` (translateY -12px → 0, opacity 0 → 1)
-- Utility classes: `.animate-slide-up`, `.animate-slide-down`, `.animate-fade-in` (already in tailwind config), stagger via `style={{ animationDelay }}`.
-
-Applied:
-- Page entry: each main page wraps content in `animate-fade-in`. Hero sections add `animate-slide-up`.
-- Cards (feature grid, KPI cards, history rows): `animate-slide-up` with 60–80 ms stagger.
-- Buttons: existing hover state + `hover:-translate-y-0.5 transition-transform` micro-interaction (already used on landing CTA — extend to dashboard/detect primary buttons).
-- Nav tabs: `transition-colors` on hover + animated underline bar.
-- Mobile menu: slide-down on open, fade-out on close.
-- Toast/dialog: leave shadcn defaults.
-
-## 4. Files touched
-
-- `src/components/top-nav.tsx` — restructured tabs, mobile sheet, animated active indicator.
-- `src/styles.css` — add `slide-up` / `slide-down` keyframes + utilities.
-- `src/assets/hero-field.jpg`, `crop-leaf-macro.jpg`, `farmer-tablet.jpg`, `disease-leaf.jpg` — generated (premium imagegen).
-- `src/routes/index.tsx` — hero imagery + entry animations.
-- `src/routes/_authenticated.dashboard.tsx` — banner + staggered cards.
-- `src/routes/_authenticated.detect.tsx` — empty-state image + fade-in results.
-- `src/routes/_authenticated.analysis.tsx` — header banner + slide-up KPI/chart cards.
-- `src/routes/_authenticated.history.tsx` — fallback image + slide-up rows.
-- `src/routes/_authenticated.knowledge.tsx` — header banner + fade-in cards.
-
-## Out of scope
-- No new routes, no backend/database changes, no auth changes.
-- No new animation libraries (Framer Motion, GSAP) — pure CSS keyframes only.
-- No redesign of the dark theme tokens; colors stay as defined in `styles.css`.
+### Out of scope
+- No DB migration (all required columns already exist on `detections`).
+- No changes to History, Analytics, or top-nav.
+- No new business logic in the AI server function.
