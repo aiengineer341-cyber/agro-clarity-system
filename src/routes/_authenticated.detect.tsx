@@ -5,7 +5,7 @@ import { detectDisease } from "@/lib/detect.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { SeverityBadge, UrgencyDot } from "@/components/severity-badge";
 import { toast } from "sonner";
-import { Upload, ScanLine, Loader2, Camera, Mic, Type, MicOff, X, Video } from "lucide-react";
+import { Upload, ScanLine, Loader2, Camera, Mic, Type, MicOff, X, Video, Save, Check } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/detect")({
   head: () => ({
@@ -46,6 +46,8 @@ function DetectPage() {
   const [description, setDescription] = useState("");
   const [result, setResult] = useState<Result | null>(null);
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [expanded, setExpanded] = useState<number>(0);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -94,6 +96,7 @@ function DetectPage() {
     reader.onload = (e) => setImage(e.target?.result as string);
     reader.readAsDataURL(f);
     setResult(null);
+    setSaved(false);
   };
 
   const startCamera = async () => {
@@ -121,6 +124,7 @@ function DetectPage() {
     const data = c.toDataURL("image/jpeg", 0.85);
     setImage(data);
     setResult(null);
+    setSaved(false);
     stopCamera();
     toast.success("Frame captured");
   };
@@ -162,6 +166,7 @@ function DetectPage() {
       return;
     }
     setLoading(true);
+    setSaved(false);
     try {
       const r = (await run({
         data: {
@@ -172,56 +177,69 @@ function DetectPage() {
       })) as unknown as Result;
       setResult(r);
       setExpanded(0);
-      const { data: u } = await supabase.auth.getUser();
-      if (u.user && r.predictions?.length) {
-        // 1. Upload image to Supabase Storage (if present) → public URL
-        let imageUrl: string | null = null;
-        if (hasImage && image) {
-          try {
-            const blob = await (await fetch(image)).blob();
-            const ext = (blob.type.split("/")[1] || "jpg").replace("jpeg", "jpg");
-            const path = `${u.user.id}/${Date.now()}_scan.${ext}`;
-            const { error: upErr } = await supabase.storage
-              .from("vision-images")
-              .upload(path, blob, { contentType: blob.type, upsert: false });
-            if (upErr) throw upErr;
-            const { data: pub } = supabase.storage.from("vision-images").getPublicUrl(path);
-            imageUrl = pub.publicUrl;
-          } catch (err) {
-            console.warn("Image upload failed; saving record without image URL", err);
-          }
-        }
-
-        // 2. Persist every ranked prediction grouped under one scan_id
-        const scanId = crypto.randomUUID();
-        const rows = r.predictions.map((p, i) => ({
-          user_id: u.user!.id,
-          scan_id: scanId,
-          rank: i + 1,
-          image_url: imageUrl,
-          crop: r.crop || crop,
-          disease: p.disease,
-          severity: p.severity,
-          confidence: p.confidence,
-          symptoms: p.symptoms,
-          treatment: p.treatment,
-          urgency: p.urgency,
-          prevention: p.prevention,
-          input_mode: mode,
-          description: hasText ? description.trim() : null,
-          rag_docs_used: r.rag_docs_used ?? null,
-          model: r.model ?? null,
-          lat: coords?.lat ?? null,
-          lng: coords?.lng ?? null,
-        }));
-        const { error: insErr } = await supabase.from("detections").insert(rows);
-        if (insErr) throw insErr;
-      }
       toast.success("Diagnosis complete");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Detection failed");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const save = async () => {
+    if (!result || !result.predictions.length) return;
+    setSaving(true);
+    try {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) throw new Error("Not signed in");
+      const hasImage = !!image;
+      const hasText = description.trim().length > 5;
+
+      let imageUrl: string | null = null;
+      if (hasImage && image) {
+        try {
+          const blob = await (await fetch(image)).blob();
+          const ext = (blob.type.split("/")[1] || "jpg").replace("jpeg", "jpg");
+          const path = `${u.user.id}/${Date.now()}_scan.${ext}`;
+          const { error: upErr } = await supabase.storage
+            .from("vision-images")
+            .upload(path, blob, { contentType: blob.type, upsert: false });
+          if (upErr) throw upErr;
+          const { data: pub } = supabase.storage.from("vision-images").getPublicUrl(path);
+          imageUrl = pub.publicUrl;
+        } catch (err) {
+          console.warn("Image upload failed; saving record without image URL", err);
+        }
+      }
+
+      const scanId = crypto.randomUUID();
+      const rows = result.predictions.map((p, i) => ({
+        user_id: u.user!.id,
+        scan_id: scanId,
+        rank: i + 1,
+        image_url: imageUrl,
+        crop: result.crop || crop,
+        disease: p.disease,
+        severity: p.severity,
+        confidence: p.confidence,
+        symptoms: p.symptoms,
+        treatment: p.treatment,
+        urgency: p.urgency,
+        prevention: p.prevention,
+        input_mode: mode,
+        description: hasText ? description.trim() : null,
+        rag_docs_used: result.rag_docs_used ?? null,
+        model: result.model ?? null,
+        lat: coords?.lat ?? null,
+        lng: coords?.lng ?? null,
+      }));
+      const { error: insErr } = await supabase.from("detections").insert(rows);
+      if (insErr) throw insErr;
+      setSaved(true);
+      toast.success("Diagnosis saved to history");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Save failed");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -430,6 +448,15 @@ function DetectPage() {
                   className="w-full mt-3 py-2.5 border border-border rounded-sm text-sm font-medium hover:bg-background transition-colors"
                 >
                   View in history
+                </button>
+                <button
+                  onClick={save}
+                  disabled={saving || saved}
+                  className="w-full py-2.5 bg-primary text-primary-foreground font-bold rounded-sm hover:bg-accent-bright disabled:opacity-60 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                >
+                  {saved ? (<><Check className="size-4" /> Saved to history</>) :
+                    saving ? (<><Loader2 className="size-4 animate-spin" /> Saving…</>) :
+                    (<><Save className="size-4" /> Save Diagnosis</>)}
                 </button>
               </div>
             )}
