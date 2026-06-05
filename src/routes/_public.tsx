@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { MarketingNav } from "@/components/marketing-nav";
 import { SiteFooter } from "@/components/site-footer";
+import { Toaster } from "sonner";
 
 export const Route = createFileRoute("/_public")({
   component: PublicLayout,
@@ -14,6 +15,7 @@ function PublicLayout() {
         <Outlet />
       </main>
       <SiteFooter />
+      <Toaster theme="dark" position="bottom-right" />
     </div>
   );
 }
