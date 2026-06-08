@@ -1,118 +1,58 @@
-
 ## Goal
 
-Add 5 new public-facing marketing pages to AgriVision, with a consistent header (existing branding) and a new shared footer. Authenticated app routes (`/dashboard`, `/detect`, etc.) remain untouched.
+Turn the Dashboard from a read-only telemetry view into an interactive workspace where users can preview their saved predictions (image + analysis data), edit any field, replace the image, and delete individual ranked predictions — all without leaving the dashboard.
 
-## Routing changes
+## UX
 
-Current `src/routes/index.tsx` is the landing/hero page behind no auth. We will:
+On `/dashboard`, the existing "Recent Detections" list becomes interactive:
 
-- Replace `index.tsx` with the new **Homepage** (hero + auto-playing carousel).
-- Add 4 new public routes:
-  - `src/routes/about.tsx` → `/about`
-  - `src/routes/team.tsx` → `/team`
-  - `src/routes/research.tsx` → `/research`
-  - `src/routes/contact.tsx` → `/contact`
-- Add a new shared **public layout** with a marketing top nav + footer:
-  - `src/routes/_public.tsx` (pathless layout)
-  - Move `index`, `about`, `team`, `research`, `contact` under it as `_public.index.tsx`, `_public.about.tsx`, etc.
-- Authenticated routes under `_authenticated.*` are unchanged.
+- Clicking a row expands an inline **Preview drawer** showing:
+  - Uploaded image thumbnail (large, with hover zoom)
+  - Crop, disease, severity badge, urgency dot, confidence %
+  - Symptoms / Treatment / Prevention / Description blocks
+  - Timestamp + rank (#1, #2, #3) within its scan
+- Two actions in the drawer header: **Edit** and **Delete**.
+- **Edit mode** swaps the drawer into a form with:
+  - Diagnosis: disease (text), severity (select: healthy/mild/moderate/severe), urgency (select: low/medium/high), confidence (0–100 slider)
+  - Clinical notes: symptoms, treatment, prevention (textareas)
+  - Context: crop (select), description (textarea)
+  - Image: "Replace image" file input → uploads to `vision-images`, swaps `image_url`
+  - **Save** / **Cancel** buttons
+- **Delete** removes that single prediction row (per-rank), with confirm dialog and toast.
+- After save/delete, the dashboard refetches and the stat strip (Total/Severe/Moderate/Healthy/Avg Confidence) and Prevalent Pathogens panel update reactively.
 
-## Shared components (new)
+Animations stay within the allowed set: fade-in drawer, slide-down expand, hover transitions on rows and image.
 
-- `src/components/marketing-nav.tsx` — sticky nav with AgroVision logo + links: Home, About, Team, Research, Contact, plus a "Sign in" CTA → `/auth`. Mirrors `top-nav` styling (sticky, blur, active underline, mobile hamburger, allowed animations only).
-- `src/components/site-footer.tsx` — consistent footer used on every public page. Sections:
-  - Brand + tagline
-  - Quick links (mirrors nav)
-  - Contact: Gmail link (`mailto:`), location
-  - Social: Twitter/X, LinkedIn, GitHub, Instagram (lucide icons, hover transitions)
-  - Bottom bar: © AgroVision {year}
+## Technical
 
-## Page-by-page
+### Server functions (`src/lib/detections.functions.ts`, new)
 
-### 1. Homepage (`/`)
-- Hero: headline ("See every leaf. Catch every disease."), subcopy about AgroVision, two CTAs ("Get Started" → `/auth`, "Learn more" → `/about`).
-- Uses existing `hero-field.jpg` as backdrop with overlay.
-- **Auto-playing carousel** of 5–6 agricultural images using the existing `embla-carousel-react` (already in `components/ui/carousel.tsx`) + `embla-carousel-autoplay` plugin (new dep). Smooth fade/slide transition, image hover scale + brightness via Tailwind.
-- Sections: "What AgroVision does" (3-feature grid using existing assets `crop-leaf-macro.jpg`, `farmer-tablet.jpg`, `disease-leaf.jpg`), final CTA band.
+Use `createServerFn` + `requireSupabaseAuth` so RLS scopes everything to `auth.uid()`:
 
-### 2. About (`/about`)
-- Mission statement: explain AgroVision — AI-powered crop disease detection for smallholder farmers, problem (yield loss from late diagnosis, limited extension services), solution (vision + RAG knowledge), impact.
-- **Tech Stack** grid section: React 19, TanStack Start, TanStack Router, Tailwind CSS v4, shadcn/ui, Vite, TypeScript, Lovable Cloud (Supabase: Postgres, Auth, Storage), Python / TensorFlow / Keras (model training), Lovable AI Gateway (Gemini vision), RAG knowledge base. Each item is a card with icon + short blurb.
+- `updateDetection({ id, patch })` — Zod-validated partial update. Allowed fields: `crop`, `disease`, `severity` (enum), `urgency` (enum), `confidence` (0–1), `symptoms`, `treatment`, `prevention`, `description`, `image_url`. String length caps (disease ≤120, notes ≤2000, description ≤2000). Returns updated row.
+- `deleteDetectionRow({ id })` — deletes a single prediction (already covered partially by existing `deleteDetection` which cascades by scan_id; add a row-only variant).
 
-### 3. Team (`/team`)
-- 3 generated profile photos (premium imagegen, transparent_background=false) of young African men — Hayford, Eric, Joseph.
-- Generated paths: `src/assets/team-hayford.jpg`, `src/assets/team-eric.jpg`, `src/assets/team-joseph.jpg`.
-- Roles: Hayford — Founder & ML Engineer; Eric — Full-Stack Engineer; Joseph — Agronomy & Data Lead.
-- Card grid with hover lift, fade-in staggered entry.
+Image replacement: client uploads the new file to `vision-images` bucket (same pattern as `detect.tsx` save flow), then calls `updateDetection` with the new `image_url`. Old image is left in storage (acceptable; can add cleanup later).
 
-### 4. Research & Use Cases (`/research`)
-- Long-form article layout: intro on AI in Agriculture, then sections for use cases:
-  1. Crop Disease Detection (with reference to AgroVision's own approach)
-  2. Yield Prediction
-  3. Soil & Nutrient Analysis
-  4. Precision Irrigation
-  5. Pest Monitoring with Computer Vision
-- Mix of prose blocks and blog-style cards. Uses `disease-leaf.jpg` / `crop-leaf-macro.jpg` as section imagery.
-- Sticky TOC sidebar on desktop (anchor links to in-page sections — acceptable for long article, per route-architecture guidance).
+### Dashboard changes (`src/routes/_authenticated.dashboard.tsx`)
 
-### 5. Contact (`/contact`)
-- Form fields: name, email, message — validated client-side with `zod` (already in deps) + react-hook-form (already installed). Submits to a new `createServerFn` `submitContact` that inserts into a new `contact_messages` table.
-- Alongside form: contact info block (Gmail `mailto:hello@agrovision.app`, social icons), reused from footer styles.
-- Success/error via existing `sonner` toaster.
+- Select all editable columns (`symptoms`, `treatment`, `prevention`, `description`, `image_url`, `rank`, `scan_id`) in addition to existing fields.
+- Extract the recent-row into a `DetectionCard` component with local `expanded` + `editing` state.
+- Add `PreviewDrawer` and `EditForm` subcomponents (kept in-file, small).
+- After mutation success: optimistically update local `det` state and re-derive stats; on error, refetch.
 
-## Backend (minimal)
+### Validation
 
-New migration: `contact_messages` table.
+Server-side Zod schema in the server fn; mirror client-side with simple input attributes (maxLength, min/max). No business-logic changes beyond CRUD on existing `detections` rows.
 
-```sql
-create table public.contact_messages (
-  id uuid primary key default gen_random_uuid(),
-  name text not null,
-  email text not null,
-  message text not null,
-  created_at timestamptz not null default now()
-);
-grant insert on public.contact_messages to anon, authenticated;
-grant all on public.contact_messages to service_role;
-alter table public.contact_messages enable row level security;
-create policy "Anyone can submit" on public.contact_messages
-  for insert to anon, authenticated with check (true);
-```
+### No DB schema changes
 
-Server fn `src/lib/contact.functions.ts` validates with zod (name 1–100, email valid, message 1–2000) and inserts via authed/anon supabase client.
+Existing `detections` table already has all the fields. RLS policies for owner update/delete are already in place (verify via `supabase--read_query` before wiring — if missing, add a migration with `USING (auth.uid() = user_id)` for UPDATE/DELETE).
 
-## Design system
+### Files
 
-- Reuse existing tokens in `src/styles.css`. No new colors.
-- Animations limited to allowed set: fade-in, fade-out, slide-up, slide-down, hover transitions, micro-interactions.
-- Carousel autoplay = 4s, smooth slide.
-- All images via `imagegen` (premium for team portraits, standard for crops/landscapes).
+- New: `src/lib/detections.functions.ts`
+- Edited: `src/routes/_authenticated.dashboard.tsx`
+- Possibly: small migration if UPDATE/DELETE policies are missing on `detections`
 
-## Asset generation
-
-- 5 carousel images (cassava field, tomato vines, maize close-up, farmer inspecting leaf, drone-over-field) → `src/assets/carousel-*.jpg`.
-- 3 team portraits.
-
-## Out of scope
-
-- No changes to existing authenticated routes, detect/save flow, dashboard metrics.
-- No new auth or roles.
-- No email sending — contact form only stores to DB (toast confirms receipt).
-- No i18n.
-
-## Files touched
-
-Created:
-- `src/routes/_public.tsx`, `_public.index.tsx`, `_public.about.tsx`, `_public.team.tsx`, `_public.research.tsx`, `_public.contact.tsx`
-- `src/components/marketing-nav.tsx`, `src/components/site-footer.tsx`
-- `src/lib/contact.functions.ts`
-- `supabase/migrations/<ts>_contact_messages.sql`
-- 5 carousel + 3 team image assets
-
-Edited:
-- Delete old `src/routes/index.tsx` (replaced by `_public.index.tsx`)
-- `package.json` (add `embla-carousel-autoplay`)
-
-Auto-regenerated:
-- `src/routeTree.gen.ts`
+History page is left as-is for now (read + delete already works there); all edit UX lives on the dashboard per your choice.
