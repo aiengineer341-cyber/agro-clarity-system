@@ -1,0 +1,1 @@
+CREATE POLICY "Own detections update" ON public.detections FOR UPDATE TO authenticated USING ((auth.uid() = user_id) OR has_role(auth.uid(), 'admin'::app_role)) WITH CHECK ((auth.uid() = user_id) OR has_role(auth.uid(), 'admin'::app_role));
