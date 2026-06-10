@@ -4,9 +4,11 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { SeverityBadge, UrgencyDot } from "@/components/severity-badge";
 import { updateDetection, deleteDetectionRow } from "@/lib/detections.functions";
-import { AlertTriangle, ScanLine, ArrowRight, Pencil, Trash2, X, Save, Loader2, ImagePlus, ChevronDown } from "lucide-react";
+import { AlertTriangle, ScanLine, ArrowRight, Pencil, Trash2, X, Save, Loader2, ImagePlus, ChevronDown, History } from "lucide-react";
 import { toast } from "sonner";
 import farmerTablet from "@/assets/farmer-tablet.jpg";
+import { DashboardCharts } from "@/components/dashboard-charts";
+import { VersionHistory } from "@/components/version-history";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -139,6 +141,9 @@ function Dashboard() {
           </Link>
         </div>
       )}
+
+      {/* Trends & distribution */}
+      <DashboardCharts det={det} />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-slide-up" style={{ animationDelay: "160ms" }}>
         {/* Recent */}
