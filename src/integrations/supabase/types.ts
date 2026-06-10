@@ -38,6 +38,44 @@ export type Database = {
         }
         Relationships: []
       }
+      detection_versions: {
+        Row: {
+          changed_at: string
+          changed_fields: string[]
+          detection_id: string
+          id: string
+          next: Json
+          previous: Json
+          user_id: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_fields?: string[]
+          detection_id: string
+          id?: string
+          next?: Json
+          previous?: Json
+          user_id: string
+        }
+        Update: {
+          changed_at?: string
+          changed_fields?: string[]
+          detection_id?: string
+          id?: string
+          next?: Json
+          previous?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "detection_versions_detection_id_fkey"
+            columns: ["detection_id"]
+            isOneToOne: false
+            referencedRelation: "detections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       detections: {
         Row: {
           confidence: number
