@@ -4,9 +4,11 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { SeverityBadge, UrgencyDot } from "@/components/severity-badge";
 import { updateDetection, deleteDetectionRow } from "@/lib/detections.functions";
-import { AlertTriangle, ScanLine, ArrowRight, Pencil, Trash2, X, Save, Loader2, ImagePlus, ChevronDown } from "lucide-react";
+import { AlertTriangle, ScanLine, ArrowRight, Pencil, Trash2, X, Save, Loader2, ImagePlus, ChevronDown, History } from "lucide-react";
 import { toast } from "sonner";
 import farmerTablet from "@/assets/farmer-tablet.jpg";
+import { DashboardCharts } from "@/components/dashboard-charts";
+import { VersionHistory } from "@/components/version-history";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -140,6 +142,9 @@ function Dashboard() {
         </div>
       )}
 
+      {/* Trends & distribution */}
+      <DashboardCharts det={det} />
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-slide-up" style={{ animationDelay: "160ms" }}>
         {/* Recent */}
         <section className="lg:col-span-8 space-y-4">
@@ -209,6 +214,8 @@ function DetectionRow({
   onDeleted: (id: string) => void;
 }) {
   const [editing, setEditing] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [historyKey, setHistoryKey] = useState(0);
   const updateFn = useServerFn(updateDetection);
   const deleteFn = useServerFn(deleteDetectionRow);
   const [busy, setBusy] = useState(false);
@@ -256,6 +263,7 @@ function DetectionRow({
       const row = await updateFn({ data: { id: d.id, patch } });
       onUpdated(row as unknown as Detection);
       setEditing(false);
+      setHistoryKey((k) => k + 1);
       toast.success("Prediction updated");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Update failed");
@@ -342,6 +350,14 @@ function DetectionRow({
                     <button onClick={() => setEditing(true)} className="px-3 py-1.5 text-xs font-medium rounded-sm border border-border hover:bg-card flex items-center gap-1.5">
                       <Pencil className="size-3" /> Edit
                     </button>
+                    <button
+                      onClick={() => setShowHistory((s) => !s)}
+                      className={`px-3 py-1.5 text-xs font-medium rounded-sm border flex items-center gap-1.5 ${
+                        showHistory ? "border-primary text-primary bg-primary/10" : "border-border hover:bg-card"
+                      }`}
+                    >
+                      <History className="size-3" /> History
+                    </button>
                     <button onClick={del} disabled={busy} className="px-3 py-1.5 text-xs font-medium rounded-sm border border-destructive/40 text-destructive hover:bg-destructive/10 flex items-center gap-1.5">
                       <Trash2 className="size-3" /> Delete
                     </button>
@@ -351,6 +367,28 @@ function DetectionRow({
                 <Field label="Treatment" value={d.treatment} />
                 <Field label="Prevention" value={d.prevention} />
                 <Field label="Notes" value={d.description} />
+                {showHistory && (
+                  <div className="pt-3 mt-2 border-t border-border">
+                    <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-2">
+                      Edit history
+                    </p>
+                    <VersionHistory
+                      key={historyKey}
+                      detectionId={d.id}
+                      onRestored={() => {
+                        setHistoryKey((k) => k + 1);
+                        supabase
+                          .from("detections")
+                          .select("id,crop,disease,severity,confidence,urgency,created_at,symptoms,treatment,prevention,description,image_url,rank,scan_id")
+                          .eq("id", d.id)
+                          .single()
+                          .then(({ data }) => {
+                            if (data) onUpdated(data as Detection);
+                          });
+                      }}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           ) : (
