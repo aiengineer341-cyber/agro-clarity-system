@@ -263,6 +263,7 @@ function DetectionRow({
       const row = await updateFn({ data: { id: d.id, patch } });
       onUpdated(row as unknown as Detection);
       setEditing(false);
+      setHistoryKey((k) => k + 1);
       toast.success("Prediction updated");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Update failed");
