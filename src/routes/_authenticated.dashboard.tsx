@@ -350,6 +350,14 @@ function DetectionRow({
                     <button onClick={() => setEditing(true)} className="px-3 py-1.5 text-xs font-medium rounded-sm border border-border hover:bg-card flex items-center gap-1.5">
                       <Pencil className="size-3" /> Edit
                     </button>
+                    <button
+                      onClick={() => setShowHistory((s) => !s)}
+                      className={`px-3 py-1.5 text-xs font-medium rounded-sm border flex items-center gap-1.5 ${
+                        showHistory ? "border-primary text-primary bg-primary/10" : "border-border hover:bg-card"
+                      }`}
+                    >
+                      <History className="size-3" /> History
+                    </button>
                     <button onClick={del} disabled={busy} className="px-3 py-1.5 text-xs font-medium rounded-sm border border-destructive/40 text-destructive hover:bg-destructive/10 flex items-center gap-1.5">
                       <Trash2 className="size-3" /> Delete
                     </button>
@@ -359,6 +367,28 @@ function DetectionRow({
                 <Field label="Treatment" value={d.treatment} />
                 <Field label="Prevention" value={d.prevention} />
                 <Field label="Notes" value={d.description} />
+                {showHistory && (
+                  <div className="pt-3 mt-2 border-t border-border">
+                    <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-2">
+                      Edit history
+                    </p>
+                    <VersionHistory
+                      key={historyKey}
+                      detectionId={d.id}
+                      onRestored={() => {
+                        setHistoryKey((k) => k + 1);
+                        supabase
+                          .from("detections")
+                          .select("id,crop,disease,severity,confidence,urgency,created_at,symptoms,treatment,prevention,description,image_url,rank,scan_id")
+                          .eq("id", d.id)
+                          .single()
+                          .then(({ data }) => {
+                            if (data) onUpdated(data as Detection);
+                          });
+                      }}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           ) : (
