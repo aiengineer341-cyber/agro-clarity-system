@@ -214,6 +214,8 @@ function DetectionRow({
   onDeleted: (id: string) => void;
 }) {
   const [editing, setEditing] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [historyKey, setHistoryKey] = useState(0);
   const updateFn = useServerFn(updateDetection);
   const deleteFn = useServerFn(deleteDetectionRow);
   const [busy, setBusy] = useState(false);
