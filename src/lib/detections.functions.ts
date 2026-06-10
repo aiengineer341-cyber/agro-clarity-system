@@ -86,6 +86,8 @@ export const deleteDetectionRow = createServerFn({ method: "POST" })
     return { success: true };
   });
 
+type JsonValue = string | number | boolean | null | JsonValue[] | { [k: string]: JsonValue };
+
 export const listDetectionVersions = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) =>
@@ -105,8 +107,8 @@ export const listDetectionVersions = createServerFn({ method: "POST" })
       user_id: string;
       changed_at: string;
       changed_fields: string[];
-      previous: Record<string, unknown>;
-      next: Record<string, unknown>;
+      previous: Record<string, JsonValue>;
+      next: Record<string, JsonValue>;
     }>;
   });
 
