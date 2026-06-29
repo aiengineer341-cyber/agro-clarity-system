@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * AgroVision AI — Precision Analytical Dark
+ * UG AgroScan AI — Precision Analytical Dark
  * Brand: bg #0b0f14, card #151b23, primary emerald #34d399, accent #a7f3d0
  * Fonts: Inter (sans), IBM Plex Mono (mono)
  */
@@ -62,7 +62,7 @@
 
 :root {
   --radius: 0.375rem;
-  /* AgroVision dark — applied as default */
+  /* UG AgroScan dark — applied as default */
   --background: oklch(0.16 0.018 230);
   --foreground: oklch(0.92 0.012 230);
   --card: oklch(0.21 0.020 230);

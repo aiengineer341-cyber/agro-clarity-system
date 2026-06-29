@@ -11,9 +11,9 @@ import cropLeaf from "@/assets/crop-leaf-macro.jpg";
 export const Route = createFileRoute("/_authenticated/analysis")({
   head: () => ({
     meta: [
-      { title: "Field Analytics — AgroVision AI" },
-      { name: "description", content: "Trends, severity distribution, top diseases, crops and input-mode breakdown for your AgroVision scans." },
-      { property: "og:title", content: "Field Analytics — AgroVision AI" },
+      { title: "Field Analytics — UG AgroScan AI" },
+      { name: "description", content: "Trends, severity distribution, top diseases, crops and input-mode breakdown for your UG AgroScan scans." },
+      { property: "og:title", content: "Field Analytics — UG AgroScan AI" },
       { property: "og:description", content: "Visual analytics over your crop disease scan history." },
       { property: "og:url", content: "https://agro-clarity-system.lovable.app/analysis" },
     ],

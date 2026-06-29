@@ -16,9 +16,9 @@ import diseaseLeaf from "@/assets/disease-leaf.jpg";
 export const Route = createFileRoute("/_public/")({
   head: () => ({
     meta: [
-      { title: "AgroVision AI — Precision Plant Disease Detection" },
+      { title: "UG AgroScan AI — Precision Plant Disease Detection" },
       { name: "description", content: "Diagnose crop diseases in seconds with AI vision and an agronomy knowledge base. Built for cassava, maize, tomato, and more." },
-      { property: "og:title", content: "AgroVision AI" },
+      { property: "og:title", content: "UG AgroScan AI" },
       { property: "og:description", content: "AI-powered plant disease detection for every farmer." },
     ],
   }),
@@ -63,7 +63,7 @@ function Home() {
             <span className="text-primary">Catch every disease.</span>
           </h1>
           <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            AgroVision turns a single phone photo into an instant agronomy diagnosis — symptoms, severity, treatment, and prevention, grounded in a curated knowledge base.
+            UG AgroScan turns a single phone photo into an instant agronomy diagnosis — symptoms, severity, treatment, and prevention, grounded in a curated knowledge base.
           </p>
           <div className="mt-10 flex flex-wrap justify-center gap-3">
             <Link to="/auth" className="inline-flex items-center gap-2 rounded-sm bg-primary px-8 py-4 text-sm font-bold text-primary-foreground hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/30 transition-all">
@@ -116,7 +116,7 @@ function Home() {
           {[
             { Icon: ScanLine, title: "Vision-grade diagnosis", body: "Multimodal models trained on field photography classify disease, severity and confidence in under a second.", img: cropMacro },
             { Icon: Database, title: "Agronomy knowledge base", body: "Every diagnosis is grounded in curated, citable disease references — not model hallucinations.", img: diseaseLeaf },
-            { Icon: Wifi, title: "Edge-ready", body: "Low-bandwidth flows keep AgroVision usable in remote fields with weak connectivity.", img: farmerTablet },
+            { Icon: Wifi, title: "Edge-ready", body: "Low-bandwidth flows keep UG AgroScan usable in remote fields with weak connectivity.", img: farmerTablet },
           ].map((f, i) => (
             <div key={f.title} className="group relative overflow-hidden rounded-md border border-border bg-card hover:border-primary/30 hover:-translate-y-1 transition-all animate-slide-up" style={{ animationDelay: `${i * 80}ms` }}>
               <div className="relative aspect-[4/3] overflow-hidden">
@@ -139,7 +139,7 @@ function Home() {
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Ready to diagnose your first field?</h2>
           <p className="mt-4 text-muted-foreground max-w-xl mx-auto">Sign in and run your first scan in under a minute. Free to start.</p>
           <Link to="/auth" className="mt-8 inline-flex items-center gap-2 rounded-sm bg-primary px-8 py-4 text-sm font-bold text-primary-foreground hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/30 transition-all">
-            Open AgroVision <ArrowRight className="size-4" />
+            Open UG AgroScan <ArrowRight className="size-4" />
           </Link>
         </div>
       </section>

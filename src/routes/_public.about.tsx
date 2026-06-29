@@ -5,10 +5,10 @@ import heroField from "@/assets/hero-field.jpg";
 export const Route = createFileRoute("/_public/about")({
   head: () => ({
     meta: [
-      { title: "About AgroVision — Mission & Tech Stack" },
-      { name: "description", content: "AgroVision is an AI-powered crop disease platform for smallholder farmers. Learn our mission, our approach, and the technology stack behind it." },
-      { property: "og:title", content: "About AgroVision" },
-      { property: "og:description", content: "The mission and tech stack behind AgroVision." },
+      { title: "About UG AgroScan — Mission & Tech Stack" },
+      { name: "description", content: "UG AgroScan is an AI-powered crop disease platform for smallholder farmers. Learn our mission, our approach, and the technology stack behind it." },
+      { property: "og:title", content: "About UG AgroScan" },
+      { property: "og:description", content: "The mission and tech stack behind UG AgroScan." },
     ],
   }),
   component: About,
@@ -28,12 +28,12 @@ function About() {
         <img src={heroField} alt="" className="absolute inset-0 w-full h-full object-cover opacity-20" />
         <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/70 to-background" />
         <div className="relative max-w-4xl mx-auto px-6 py-24 animate-slide-up">
-          <p className="text-[10px] font-mono uppercase tracking-widest text-primary mb-3">About AgroVision</p>
+          <p className="text-[10px] font-mono uppercase tracking-widest text-primary mb-3">About UG AgroScan</p>
           <h1 className="text-5xl md:text-6xl font-bold tracking-tight leading-[1.02]">
             Putting an agronomist in every farmer's pocket.
           </h1>
           <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-            AgroVision is an AI-powered plant disease detection platform built for smallholder farmers, extension officers, and agricultural researchers. We turn a single phone photo into a credible, citable diagnosis — symptoms, severity, treatment, and prevention — in under a second.
+            UG AgroScan is an AI-powered plant disease detection platform built for smallholder farmers, extension officers, and agricultural researchers. We turn a single phone photo into a credible, citable diagnosis — symptoms, severity, treatment, and prevention — in under a second.
           </p>
         </div>
       </section>
@@ -58,7 +58,7 @@ function About() {
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Tech Stack</h2>
         </div>
         <p className="text-muted-foreground max-w-2xl mb-10">
-          AgroVision runs on a modern, edge-friendly stack. Every layer is chosen so the experience stays fast for farmers on slow connections, and trustworthy for researchers reviewing outputs.
+          UG AgroScan runs on a modern, edge-friendly stack. Every layer is chosen so the experience stays fast for farmers on slow connections, and trustworthy for researchers reviewing outputs.
         </p>
         <div className="grid md:grid-cols-2 gap-6">
           {stack.map((s, i) => (

@@ -8,8 +8,8 @@ import { ArrowRight } from "lucide-react";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in — AgroVision AI" },
-      { name: "description", content: "Sign in or create an AgroVision AI account to start diagnosing crop diseases." },
+      { title: "Sign in — UG AgroScan AI" },
+      { name: "description", content: "Sign in or create a UG AgroScan AI account to start diagnosing crop diseases." },
     ],
   }),
   component: AuthPage,
@@ -66,7 +66,7 @@ function AuthPage() {
             Diagnose any crop. <span className="text-primary">Anywhere.</span>
           </h2>
           <p className="text-muted-foreground leading-relaxed">
-            AgroVision AI combines multi-spectral computer vision with a curated agronomy
+            UG AgroScan AI combines multi-spectral computer vision with a curated agronomy
             knowledge base. Snap a leaf, get a treatment plan in seconds.
           </p>
           <div className="grid grid-cols-3 gap-4 pt-6 border-t border-border">
@@ -76,7 +76,7 @@ function AuthPage() {
           </div>
         </div>
         <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-          © 2026 AgroVision AI — Precision Agriculture Protocol
+          © 2026 UG AgroScan AI — Precision Agriculture Protocol
         </p>
       </div>
 
@@ -86,7 +86,7 @@ function AuthPage() {
 
           <div>
             <h1 className="text-2xl font-bold tracking-tight">
-              {mode === "signin" ? "Sign in to AgroVision" : "Create your account"}
+              {mode === "signin" ? "Sign in to UG AgroScan" : "Create your account"}
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
               {mode === "signin" ? "Welcome back." : "Start diagnosing in seconds."}

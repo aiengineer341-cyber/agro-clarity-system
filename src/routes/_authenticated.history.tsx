@@ -11,9 +11,9 @@ import diseaseLeaf from "@/assets/disease-leaf.jpg";
 export const Route = createFileRoute("/_authenticated/history")({
   head: () => ({
     meta: [
-      { title: "Detection History — AgroVision AI" },
+      { title: "Detection History — UG AgroScan AI" },
       { name: "description", content: "Review past crop disease scans with ranked predictions, confidence scores, severity, and treatment notes." },
-      { property: "og:title", content: "Detection History — AgroVision AI" },
+      { property: "og:title", content: "Detection History — UG AgroScan AI" },
       { property: "og:description", content: "Past crop disease scans with ranked predictions and confidence scores." },
       { property: "og:url", content: "https://agro-clarity-system.lovable.app/history" },
     ],

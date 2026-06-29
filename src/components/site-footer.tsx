@@ -11,10 +11,10 @@ const nav = [
 ];
 
 const socials = [
-  { href: "https://twitter.com/agrovision", Icon: Twitter, label: "Twitter" },
-  { href: "https://linkedin.com/company/agrovision", Icon: Linkedin, label: "LinkedIn" },
-  { href: "https://github.com/agrovision", Icon: Github, label: "GitHub" },
-  { href: "https://instagram.com/agrovision", Icon: Instagram, label: "Instagram" },
+  { href: "https://twitter.com/ugagroscan", Icon: Twitter, label: "Twitter" },
+  { href: "https://linkedin.com/company/ugagroscan", Icon: Linkedin, label: "LinkedIn" },
+  { href: "https://github.com/ugagroscan", Icon: Github, label: "GitHub" },
+  { href: "https://instagram.com/ugagroscan", Icon: Instagram, label: "Instagram" },
 ];
 
 export function SiteFooter() {
@@ -59,8 +59,8 @@ export function SiteFooter() {
           <h4 className="text-[11px] font-mono uppercase tracking-[0.18em] text-foreground">Contact</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li>
-              <a href="mailto:hello@agrovision.ai" className="inline-flex items-center gap-2 hover:text-primary transition-colors">
-                <Mail className="size-3.5" /> hello@agrovision.ai
+              <a href="mailto:hello@ugagroscan.ai" className="inline-flex items-center gap-2 hover:text-primary transition-colors">
+                <Mail className="size-3.5" /> hello@ugagroscan.ai
               </a>
             </li>
             <li className="inline-flex items-center gap-2">
@@ -71,7 +71,7 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-border">
         <div className="max-w-7xl mx-auto px-6 py-5 flex flex-col sm:flex-row gap-3 justify-between items-center text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-          <span>© {new Date().getFullYear()} AgroVision AI</span>
+          <span>© {new Date().getFullYear()} UG AgroScan AI</span>
           <span>Protocol v1.0 · Built for the field</span>
         </div>
       </div>

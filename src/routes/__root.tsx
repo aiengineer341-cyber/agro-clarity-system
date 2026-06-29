@@ -72,10 +72,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "AgroVision AI — Precision Plant Disease Detection" },
+      { title: "UG AgroScan AI — Precision Plant Disease Detection" },
       { name: "description", content: "AI-powered plant disease detection and treatment guidance for farmers. Multi-spectral computer vision turns field photos into actionable harvest intelligence." },
-      { name: "author", content: "AgroVision AI" },
-      { property: "og:title", content: "AgroVision AI — Precision Plant Disease Detection" },
+      { name: "author", content: "UG AgroScan AI" },
+      { property: "og:title", content: "UG AgroScan AI — Precision Plant Disease Detection" },
       { property: "og:description", content: "Diagnose crop diseases in seconds with AI vision and an agronomy knowledge base." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

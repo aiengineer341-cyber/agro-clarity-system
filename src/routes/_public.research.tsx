@@ -9,7 +9,7 @@ export const Route = createFileRoute("/_public/research")({
     meta: [
       { title: "Research & Use Cases — AI in Agriculture" },
       { name: "description", content: "An in-depth look at how AI transforms agriculture: crop disease detection, yield prediction, soil analysis, irrigation, and pest monitoring." },
-      { property: "og:title", content: "AI in Agriculture — AgroVision Research" },
+      { property: "og:title", content: "AI in Agriculture — UG AgroScan Research" },
       { property: "og:description", content: "Real-world use cases of AI in farming." },
     ],
   }),
@@ -21,7 +21,7 @@ const sections = [
     id: "disease",
     Icon: Microscope,
     title: "Crop Disease Detection",
-    body: "Computer vision models trained on tens of thousands of annotated leaf images can classify pathogens like cassava mosaic, tomato late blight, and maize streak in under a second — accuracy now rivals trained extension officers in benchmark studies. AgroVision pairs this with retrieval-augmented generation over a curated agronomy corpus so every diagnosis comes with cited symptoms, treatment, and prevention.",
+    body: "Computer vision models trained on tens of thousands of annotated leaf images can classify pathogens like cassava mosaic, tomato late blight, and maize streak in under a second — accuracy now rivals trained extension officers in benchmark studies. UG AgroScan pairs this with retrieval-augmented generation over a curated agronomy corpus so every diagnosis comes with cited symptoms, treatment, and prevention.",
   },
   {
     id: "yield",
@@ -59,7 +59,7 @@ function Research() {
           <p className="text-[10px] font-mono uppercase tracking-widest text-primary mb-3">Research</p>
           <h1 className="text-5xl md:text-6xl font-bold tracking-tight leading-[1.02]">AI in Agriculture: from sensors to decisions.</h1>
           <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-            Agriculture is the original data problem: variable inputs, noisy signals, high stakes. Over the past decade, advances in vision, language models, and edge computing have made it possible to turn raw field data into decisions that materially change yields and livelihoods. This is a survey of the use cases that matter — and how AgroVision fits into them.
+            Agriculture is the original data problem: variable inputs, noisy signals, high stakes. Over the past decade, advances in vision, language models, and edge computing have made it possible to turn raw field data into decisions that materially change yields and livelihoods. This is a survey of the use cases that matter — and how UG AgroScan fits into them.
           </p>
         </div>
       </section>
@@ -97,7 +97,7 @@ function Research() {
               <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent" />
             </div>
             <div className="p-8">
-              <h3 className="text-xl font-semibold mb-2">Where AgroVision focuses</h3>
+              <h3 className="text-xl font-semibold mb-2">Where UG AgroScan focuses</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 We start with disease detection because it is the highest-leverage decision a smallholder makes in a season. From there, every additional signal — soil, weather, pest counts — compounds into a more reliable agronomy assistant. The roadmap is wide; the wedge is narrow and deep.
               </p>

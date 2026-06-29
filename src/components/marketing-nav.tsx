@@ -29,7 +29,7 @@ export function MarketingNav() {
     <nav className={`sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md transition-shadow ${scrolled ? "shadow-[0_4px_24px_-12px_rgba(0,0,0,0.6)]" : ""}`}>
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         <div className="flex items-center gap-10">
-          <Link to="/" aria-label="AgroVision home"><Logo /></Link>
+          <Link to="/" aria-label="UG AgroScan home"><Logo /></Link>
           <div className="hidden md:flex items-center gap-6 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
             {items.map((i) => {
               const active = i.to === "/" ? path === "/" : path.startsWith(i.to);
