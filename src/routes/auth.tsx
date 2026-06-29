@@ -9,7 +9,7 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Sign in — UG AgroScan AI" },
-      { name: "description", content: "Sign in or create an UG AgroScan AI account to start diagnosing crop diseases." },
+      { name: "description", content: "Sign in or create a UG AgroScan AI account to start diagnosing crop diseases." },
     ],
   }),
   component: AuthPage,
