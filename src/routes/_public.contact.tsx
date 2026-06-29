@@ -8,9 +8,9 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_public/contact")({
   head: () => ({
     meta: [
-      { title: "Contact — AgroVision AI" },
-      { name: "description", content: "Get in touch with the AgroVision team. Send us a message, partnership idea, or research question." },
-      { property: "og:title", content: "Contact AgroVision" },
+      { title: "Contact — UG AgroScan AI" },
+      { name: "description", content: "Get in touch with the UG AgroScan team. Send us a message, partnership idea, or research question." },
+      { property: "og:title", content: "Contact UG AgroScan" },
       { property: "og:description", content: "We'd love to hear from you." },
     ],
   }),
@@ -24,10 +24,10 @@ const schema = z.object({
 });
 
 const socials = [
-  { href: "https://twitter.com/agrovision", Icon: Twitter, label: "Twitter" },
-  { href: "https://linkedin.com/company/agrovision", Icon: Linkedin, label: "LinkedIn" },
-  { href: "https://github.com/agrovision", Icon: Github, label: "GitHub" },
-  { href: "https://instagram.com/agrovision", Icon: Instagram, label: "Instagram" },
+  { href: "https://twitter.com/ugagroscan", Icon: Twitter, label: "Twitter" },
+  { href: "https://linkedin.com/company/ugagroscan", Icon: Linkedin, label: "LinkedIn" },
+  { href: "https://github.com/ugagroscan", Icon: Github, label: "GitHub" },
+  { href: "https://instagram.com/ugagroscan", Icon: Instagram, label: "Instagram" },
 ];
 
 function Contact() {
@@ -64,17 +64,17 @@ function Contact() {
         <p className="text-[10px] font-mono uppercase tracking-widest text-primary mb-3">Get in touch</p>
         <h1 className="text-5xl md:text-6xl font-bold tracking-tight">Let's talk fields.</h1>
         <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-          Partnerships, research collaborations, or just curious about AgroVision? Send a note and we'll reply within a couple of working days.
+          Partnerships, research collaborations, or just curious about UG AgroScan? Send a note and we'll reply within a couple of working days.
         </p>
 
         <div className="mt-10 space-y-4">
-          <a href="mailto:hello@agrovision.ai" className="flex items-center gap-3 group">
+          <a href="mailto:hello@ugagroscan.ai" className="flex items-center gap-3 group">
             <div className="size-10 rounded-sm bg-primary/10 grid place-items-center group-hover:bg-primary/20 transition-colors">
               <Mail className="size-4 text-primary" />
             </div>
             <div>
               <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Email</p>
-              <p className="text-sm text-foreground group-hover:text-primary transition-colors">hello@agrovision.ai</p>
+              <p className="text-sm text-foreground group-hover:text-primary transition-colors">hello@ugagroscan.ai</p>
             </div>
           </a>
           <div className="flex items-center gap-3">

@@ -6,10 +6,10 @@ import joseph from "@/assets/team-joseph.jpg";
 export const Route = createFileRoute("/_public/team")({
   head: () => ({
     meta: [
-      { title: "Team — AgroVision AI" },
-      { name: "description", content: "Meet the team behind AgroVision: Hayford, Eric, and Joseph — building AI for African agriculture." },
-      { property: "og:title", content: "AgroVision Team" },
-      { property: "og:description", content: "The people behind AgroVision." },
+      { title: "Team — UG AgroScan AI" },
+      { name: "description", content: "Meet the team behind UG AgroScan: Hayford, Eric, and Joseph — building AI for African agriculture." },
+      { property: "og:title", content: "UG AgroScan Team" },
+      { property: "og:description", content: "The people behind UG AgroScan." },
     ],
   }),
   component: Team,
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_public/team")({
 const team = [
   { name: "Hayford", role: "Founder & ML Engineer", img: hayford, bio: "Leads model strategy and product direction. Obsessed with making diagnosis feel instant." },
   { name: "Eric", role: "Full-Stack Engineer", img: eric, bio: "Owns the platform end-to-end — from edge functions to the field-ready UI farmers actually use." },
-  { name: "Joseph", role: "Agronomy & Data Lead", img: joseph, bio: "Curates the knowledge base and pathology datasets that keep AgroVision grounded in real agronomy." },
+  { name: "Joseph", role: "Agronomy & Data Lead", img: joseph, bio: "Curates the knowledge base and pathology datasets that keep UG AgroScan grounded in real agronomy." },
 ];
 
 function Team() {
@@ -28,7 +28,7 @@ function Team() {
         <p className="text-[10px] font-mono uppercase tracking-widest text-primary mb-3">The team</p>
         <h1 className="text-5xl md:text-6xl font-bold tracking-tight">Three builders. One field.</h1>
         <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto">
-          AgroVision is built by a small team of engineers and agronomists based in Ghana, building tools we wish our families had on the farm.
+          UG AgroScan is built by a small team of engineers and agronomists based in Ghana, building tools we wish our families had on the farm.
         </p>
       </section>
 

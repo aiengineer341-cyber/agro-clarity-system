@@ -7,9 +7,9 @@ import diseaseLeaf from "@/assets/disease-leaf.jpg";
 export const Route = createFileRoute("/_authenticated/knowledge")({
   head: () => ({
     meta: [
-      { title: "Agronomy Knowledge Base — AgroVision AI" },
-      { name: "description", content: "Searchable reference library of crop diseases, symptoms, and treatments powering AgroVision's RAG diagnoses." },
-      { property: "og:title", content: "Agronomy Knowledge Base — AgroVision AI" },
+      { title: "Agronomy Knowledge Base — UG AgroScan AI" },
+      { name: "description", content: "Searchable reference library of crop diseases, symptoms, and treatments powering UG AgroScan's RAG diagnoses." },
+      { property: "og:title", content: "Agronomy Knowledge Base — UG AgroScan AI" },
       { property: "og:description", content: "Searchable crop disease reference library powering RAG diagnoses." },
       { property: "og:url", content: "https://agro-clarity-system.lovable.app/knowledge" },
     ],

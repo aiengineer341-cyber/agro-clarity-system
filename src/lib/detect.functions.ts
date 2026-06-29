@@ -29,7 +29,7 @@ export const detectDisease = createServerFn({ method: "POST" })
         .map((d, i) => `[${i + 1}] ${d.title}: ${d.content}`)
         .join("\n") || "No reference docs available.";
 
-    const system = `You are an expert plant pathologist for AgroVision AI. Diagnose the crop based on the provided image and/or symptom description.
+    const system = `You are an expert plant pathologist for UG AgroScan AI. Diagnose the crop based on the provided image and/or symptom description.
 
 REFERENCE KNOWLEDGE BASE:
 ${ragText}
