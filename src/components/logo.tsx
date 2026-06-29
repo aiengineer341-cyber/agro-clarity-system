@@ -13,7 +13,7 @@ export function Logo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
         />
       </div>
       <span className={`font-mono font-medium tracking-tighter text-foreground ${text}`}>
-        AGROVISION <span className="text-primary">AI</span>
+        UG <span className="text-primary">AGROSCAN</span>
       </span>
     </div>
   );
