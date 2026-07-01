@@ -112,6 +112,25 @@ function AuthPage() {
             </p>
           </div>
 
+          <button
+            type="button"
+            onClick={signInWithGoogle}
+            disabled={googleLoading || loading}
+            aria-label="Continue with Google"
+            className="group w-full py-3 px-4 bg-white text-[#1f1f1f] font-medium rounded-sm border border-[#dadce0] hover:shadow-md hover:border-[#d2e3fc] active:scale-[0.98] transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+            style={{ fontFamily: "'Roboto', 'Inter', system-ui, sans-serif" }}
+          >
+            <GoogleG className={`size-5 shrink-0 transition-transform duration-200 ${googleLoading ? "animate-spin" : "group-hover:scale-110"}`} />
+            <span className="text-sm">{googleLoading ? "Connecting…" : "Continue with Google"}</span>
+          </button>
+
+          <div className="relative py-1">
+            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
+            <div className="relative flex justify-center">
+              <span className="bg-background px-3 text-[10px] font-mono uppercase tracking-widest text-muted-foreground">or</span>
+            </div>
+          </div>
+
           <form onSubmit={submit} className="space-y-4">
             {mode === "signup" && (
               <Field
