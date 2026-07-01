@@ -46,17 +46,51 @@ const MODE_COLORS = ["#22d3ee", "#a78bfa", "#f472b6", "#34d399"];
 function AnalysisPage() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [live, setLive] = useState(false);
+  const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
 
-  useEffect(() => {
-    supabase
+  const load = async () => {
+    const { data, error } = await supabase
       .from("detections")
       .select("id,scan_id,rank,crop,disease,severity,confidence,input_mode,created_at")
       .order("created_at", { ascending: false })
-      .limit(1000)
-      .then(({ data }) => {
-        setRows((data as Row[]) ?? []);
-        setLoading(false);
-      });
+      .limit(1000);
+    if (error) setError(error.message);
+    else {
+      setError(null);
+      setRows((data as Row[]) ?? []);
+      setUpdatedAt(new Date());
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    load();
+    const onFocus = () => load();
+    const onVis = () => { if (document.visibilityState === "visible") load(); };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVis);
+
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    supabase.auth.getUser().then(({ data }) => {
+      const uid = data.user?.id;
+      if (!uid) return;
+      channel = supabase
+        .channel("detections-analytics")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "detections", filter: `user_id=eq.${uid}` },
+          () => load(),
+        )
+        .subscribe((status) => setLive(status === "SUBSCRIBED"));
+    });
+
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVis);
+      if (channel) supabase.removeChannel(channel);
+    };
   }, []);
 
   const stats = useMemo(() => computeStats(rows), [rows]);
@@ -82,6 +116,17 @@ function AnalysisPage() {
             <p className="text-sm text-muted-foreground mt-2 max-w-md">
               Trends and distribution across every scan in your field history.
             </p>
+            <div className="flex items-center gap-2 mt-3">
+              <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-sm border text-[10px] font-mono uppercase tracking-widest ${live ? "border-primary/40 text-primary" : "border-border text-muted-foreground"}`}>
+                <span className={`size-1.5 rounded-full ${live ? "bg-primary animate-pulse" : "bg-muted-foreground"}`} />
+                {live ? "Live" : "Offline"}
+              </span>
+              {updatedAt && (
+                <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+                  Updated {updatedAt.toLocaleTimeString()}
+                </span>
+              )}
+            </div>
           </div>
           <Link
             to="/detect"
@@ -94,6 +139,16 @@ function AnalysisPage() {
 
       {loading ? (
         <p className="text-sm text-muted-foreground">Loading analytics…</p>
+      ) : error ? (
+        <div className="rounded-sm border border-destructive/40 bg-destructive/5 p-6 text-center space-y-3">
+          <p className="text-sm text-destructive">Failed to load analytics: {error}</p>
+          <button
+            onClick={() => { setLoading(true); load(); }}
+            className="px-4 py-2 text-[10px] font-mono uppercase tracking-widest border border-border rounded-sm hover:border-primary hover:text-primary"
+          >
+            Retry
+          </button>
+        </div>
       ) : rows.length === 0 ? (
         <div className="rounded-sm border border-border bg-card p-12 text-center">
           <p className="text-sm text-muted-foreground">No scan data yet. Run a detection to see analytics.</p>

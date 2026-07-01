@@ -1,54 +1,36 @@
-## Goal
+## Problem
 
-1. **Version history**: every time a user edits a prediction on the dashboard, store a timestamped snapshot of the prior values so they can browse, diff, and (optionally) restore.
-2. **Visualization**: add an interactive analytics panel to `/dashboard` with a line chart (detections-over-time trend) and a pie chart (severity / disease distribution).
+The `/analysis` page fetches detections once inside a `useEffect` on mount and never listens for new inserts. So after you save a diagnosis on `/detect` (or in another tab), the Analytics page keeps showing the stale snapshot — often "No scan data yet" if it was opened before the first save. It also silently swallows query errors, so an RLS/session hiccup looks identical to "empty".
 
-## 1. Version history
+The database itself is fine: `detections` has 40 rows across 4 users and RLS lets each owner (plus admins / extension officers) read their own rows.
 
-### Schema
-New table `public.detection_versions`:
-- `id uuid pk`
-- `detection_id uuid` → `detections.id` (ON DELETE CASCADE)
-- `user_id uuid` (the editor)
-- `changed_at timestamptz default now()`
-- `changed_fields text[]` (which keys changed)
-- `previous jsonb` (full previous values for those fields)
-- `next jsonb` (new values)
+## Fix
 
-RLS: owner can SELECT/INSERT for their own detections; admins can SELECT. GRANT to authenticated + service_role.
+Update `src/routes/_authenticated.analysis.tsx` only — no schema or business-logic changes.
 
-### Server functions (`src/lib/detections.functions.ts`)
-- Update `updateDetection`: before writing the patch, fetch the current row, diff against the patch, and insert a `detection_versions` row capturing only changed fields. Then apply the update.
-- New `listDetectionVersions({ detection_id })`: returns versions ordered by `changed_at desc`.
-- New `restoreDetectionVersion({ version_id })`: applies `version.previous` back to the detection (also creates a new version row — restore is itself an edit).
+1. **Refetch on focus + on route mount**
+   - Extract the fetch into a `load()` function.
+   - Call it on mount, on `window` `focus`, and on `visibilitychange` when the tab becomes visible.
 
-### Dashboard UI
-In the expanded preview drawer, add a "History" toggle next to Edit/Delete. Opens an inline panel listing each version:
-- timestamp (relative + absolute on hover)
-- changed fields as chips
-- expandable diff (previous → next per field)
-- **Restore** button per entry
+2. **Realtime subscription**
+   - Subscribe to `postgres_changes` on `public.detections` filtered by `user_id=eq.<currentUserId>` for `INSERT`, `UPDATE`, `DELETE`.
+   - On any event, call `load()` so charts and KPIs update live while the user watches.
+   - Enable realtime for the table via migration: `ALTER PUBLICATION supabase_realtime ADD TABLE public.detections;` (idempotent — wrapped in a `DO` block that ignores "already member").
 
-## 2. Visualization
+3. **Surface errors instead of silent empty state**
+   - If the Supabase query returns an `error`, show a red inline message with a Retry button instead of "No scan data yet."
+   - Distinguish three states: `loading`, `error`, `empty`, `ready`.
 
-New section on `/dashboard` titled "Trends & Distribution", placed above "Recent Detections":
-
-- **Line chart** (recharts `LineChart`): detections per day for the last 30 days, with selectable range buttons (7d / 30d / 90d). One line for total, optional second line for severe cases. Interactive tooltip with date + counts. Animated draw on mount (recharts default).
-- **Pie chart** (recharts `PieChart`): toggle between **Severity distribution** (healthy/mild/moderate/severe) and **Top diseases** (top 5 + "Other"). Interactive: hover slice highlights + tooltip with count and %.
-
-Both pull from the same `det` array already loaded by the dashboard — no extra fetch. Use design tokens for stroke/fill (`--primary`, `--destructive`, `--warn`, `--success`, `--muted`).
-
-## Technical notes
-
-- Charts in a new `src/components/dashboard-charts.tsx` to keep the route file lean.
-- Recharts and date-fns are already installed.
-- All animations stay within allowed set (fade-in panels, default recharts transitions).
-- No changes to detection/save flow on `/detect` — versions are recorded only on edits via `updateDetection`.
+4. **Optional small polish**
+   - Show a subtle "Updated Xs ago · Live" pill in the header when the realtime channel is subscribed, so it's obvious the page is live.
 
 ## Files
 
-- New migration: `detection_versions` table + RLS + grants.
-- Edited: `src/lib/detections.functions.ts` (version diff on update, list, restore).
-- New: `src/components/dashboard-charts.tsx`.
-- New: `src/components/version-history.tsx`.
-- Edited: `src/routes/_authenticated.dashboard.tsx` (charts section, History toggle in drawer).
+- Edited: `src/routes/_authenticated.analysis.tsx`
+- New migration: enable realtime replication for `public.detections`.
+
+## Not changing
+
+- Detect/save flow on `/detect`.
+- Dashboard charts (`src/components/dashboard-charts.tsx`) — already re-computes from the dashboard's own fetched rows.
+- RLS policies — current ones already allow the owner to read their scans.
