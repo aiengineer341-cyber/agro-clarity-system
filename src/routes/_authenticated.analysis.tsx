@@ -35,13 +35,31 @@ type Row = {
 };
 
 const SEVERITY_COLORS: Record<string, string> = {
-  healthy: "hsl(var(--success, 142 71% 45%))",
-  mild: "hsl(48 96% 53%)",
-  moderate: "hsl(32 95% 55%)",
-  severe: "hsl(0 84% 60%)",
-  unknown: "hsl(220 9% 46%)",
+  healthy: "var(--color-success)",
+  mild: "var(--color-primary)",
+  moderate: "var(--color-warn)",
+  severe: "var(--color-destructive)",
+  unknown: "var(--color-muted-foreground)",
 };
-const MODE_COLORS = ["#22d3ee", "#a78bfa", "#f472b6", "#34d399"];
+const MODE_COLORS = [
+  "var(--color-primary)",
+  "var(--color-warn)",
+  "var(--color-accent-bright)",
+  "var(--color-chart-4)",
+];
+
+const tooltipStyle = {
+  background: "var(--color-card)",
+  border: "1px solid var(--color-border)",
+  borderRadius: 2,
+  fontSize: 12,
+} as const;
+
+const axisTick = {
+  fill: "var(--color-muted-foreground)",
+  fontSize: 10,
+  fontFamily: "monospace",
+} as const;
 
 function AnalysisPage() {
   const [rows, setRows] = useState<Row[]>([]);
@@ -166,11 +184,11 @@ function AnalysisPage() {
             <Panel title="Scans Over Time" className="lg:col-span-8 h-[320px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={stats.daily}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={10} />
-                  <YAxis allowDecimals={false} stroke="hsl(var(--muted-foreground))" fontSize={10} />
-                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", fontSize: 12 }} />
-                  <Line type="monotone" dataKey="scans" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+                  <CartesianGrid strokeDasharray="2 4" stroke="var(--color-border)" vertical={false} />
+                  <XAxis dataKey="day" tick={axisTick} stroke="var(--color-border)" minTickGap={20} />
+                  <YAxis allowDecimals={false} tick={axisTick} stroke="var(--color-border)" />
+                  <Tooltip contentStyle={tooltipStyle} cursor={{ stroke: "var(--color-primary)", strokeOpacity: 0.3 }} />
+                  <Line type="monotone" dataKey="scans" stroke="var(--color-primary)" strokeWidth={2} dot={{ r: 2 }} activeDot={{ r: 5 }} />
                 </LineChart>
               </ResponsiveContainer>
             </Panel>
@@ -178,13 +196,13 @@ function AnalysisPage() {
             <Panel title="Severity Mix" className="lg:col-span-4 h-[320px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={stats.severity} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90} paddingAngle={2}>
+                  <Pie data={stats.severity} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90} paddingAngle={2} stroke="var(--color-card)">
                     {stats.severity.map((s) => (
                       <Cell key={s.name} fill={SEVERITY_COLORS[s.name] ?? SEVERITY_COLORS.unknown} />
                     ))}
                   </Pie>
-                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", fontSize: 12 }} />
-                  <Legend wrapperStyle={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em" }} />
+                  <Tooltip contentStyle={tooltipStyle} />
+                  <Legend wrapperStyle={{ fontSize: 11, textTransform: "capitalize" }} iconType="circle" />
                 </PieChart>
               </ResponsiveContainer>
             </Panel>
@@ -192,11 +210,11 @@ function AnalysisPage() {
             <Panel title="Top Diseases" className="lg:col-span-7 h-[360px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={stats.diseases} layout="vertical" margin={{ left: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis type="number" allowDecimals={false} stroke="hsl(var(--muted-foreground))" fontSize={10} />
-                  <YAxis type="category" dataKey="name" width={140} stroke="hsl(var(--muted-foreground))" fontSize={11} />
-                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", fontSize: 12 }} />
-                  <Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                  <CartesianGrid strokeDasharray="2 4" stroke="var(--color-border)" horizontal={false} />
+                  <XAxis type="number" allowDecimals={false} tick={axisTick} stroke="var(--color-border)" />
+                  <YAxis type="category" dataKey="name" width={140} tick={{ ...axisTick, fontSize: 11 }} stroke="var(--color-border)" />
+                  <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "var(--color-accent)", fillOpacity: 0.3 }} />
+                  <Bar dataKey="count" fill="var(--color-primary)" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </Panel>
@@ -204,11 +222,11 @@ function AnalysisPage() {
             <Panel title="Crops Scanned" className="lg:col-span-5 h-[360px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={stats.crops}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={10} />
-                  <YAxis allowDecimals={false} stroke="hsl(var(--muted-foreground))" fontSize={10} />
-                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", fontSize: 12 }} />
-                  <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                  <CartesianGrid strokeDasharray="2 4" stroke="var(--color-border)" vertical={false} />
+                  <XAxis dataKey="name" tick={axisTick} stroke="var(--color-border)" />
+                  <YAxis allowDecimals={false} tick={axisTick} stroke="var(--color-border)" />
+                  <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "var(--color-accent)", fillOpacity: 0.3 }} />
+                  <Bar dataKey="count" fill="var(--color-accent-bright)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </Panel>
@@ -216,13 +234,13 @@ function AnalysisPage() {
             <Panel title="Input Mode Mix" className="lg:col-span-5 h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={stats.modes} dataKey="value" nameKey="name" innerRadius={40} outerRadius={80} paddingAngle={2}>
+                  <Pie data={stats.modes} dataKey="value" nameKey="name" innerRadius={40} outerRadius={80} paddingAngle={2} stroke="var(--color-card)">
                     {stats.modes.map((m, i) => (
                       <Cell key={m.name} fill={MODE_COLORS[i % MODE_COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", fontSize: 12 }} />
-                  <Legend wrapperStyle={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em" }} />
+                  <Tooltip contentStyle={tooltipStyle} />
+                  <Legend wrapperStyle={{ fontSize: 11, textTransform: "capitalize" }} iconType="circle" />
                 </PieChart>
               </ResponsiveContainer>
             </Panel>
@@ -230,10 +248,10 @@ function AnalysisPage() {
             <Panel title="Confidence by Severity" className="lg:col-span-7 h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={stats.confBySeverity}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={10} />
-                  <YAxis domain={[0, 100]} stroke="hsl(var(--muted-foreground))" fontSize={10} />
-                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", fontSize: 12 }} formatter={(v: number) => `${v}%`} />
+                  <CartesianGrid strokeDasharray="2 4" stroke="var(--color-border)" vertical={false} />
+                  <XAxis dataKey="name" tick={axisTick} stroke="var(--color-border)" />
+                  <YAxis domain={[0, 100]} tick={axisTick} stroke="var(--color-border)" />
+                  <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "var(--color-accent)", fillOpacity: 0.3 }} formatter={(v: number) => `${v}%`} />
                   <Bar dataKey="avg" radius={[4, 4, 0, 0]}>
                     {stats.confBySeverity.map((s) => (
                       <Cell key={s.name} fill={SEVERITY_COLORS[s.name] ?? SEVERITY_COLORS.unknown} />
