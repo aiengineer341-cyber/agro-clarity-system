@@ -1,35 +1,41 @@
-## Problem
+## Context
 
-The Analytics dashboard renders charts with mostly black/invisible fills (see screenshot: donut is black, bars are black, grid lines missing). The chart code uses `hsl(var(--primary))`, `hsl(var(--border))`, etc., but the design tokens in `src/styles.css` are defined as `oklch(...)` values — not space-separated HSL channels — so `hsl(var(--primary))` evaluates to an invalid color and Recharts falls back to black.
+The app is dark-mode only (`:root` in `src/styles.css` already defines the dark palette; there is no light theme to switch to). After the last change, chart fills and axes use theme tokens correctly, but a few Recharts elements still don't inherit the dark palette:
 
-`dashboard-charts.tsx` already does this correctly (uses `var(--color-primary)`). The analytics page just needs the same treatment plus a slight palette pass to match the emerald/amber/red app palette.
+- **Legend text** — Recharts renders legend labels with an inline `color: #000` by default, which is unreadable on the dark card background.
+- **Tooltip label + item text** — `contentStyle` only styles the wrapper; the item name/value use `itemStyle` / `labelStyle` and default to near-black.
+- **Tooltip cursor on line charts** — currently a faint primary stroke, hard to see on dark.
+- **Pie slice separators** — thin `var(--color-card)` stroke is fine, but very small slices disappear on dark; add a subtle outer stroke.
+- **KPI strip divider** — `bg-border` gap is nearly invisible on dark; bump to `bg-background` for crisper separators like the dashboard.
 
 ## Fix (scope: `src/routes/_authenticated.analysis.tsx` only)
 
-1. **Replace every `hsl(var(--x))` with `var(--color-x)`** in axes, grids, tooltips, lines, bars, and pies. This is a mechanical swap that immediately restores color.
+1. **Global chart text defaults** — introduce shared style objects and apply them everywhere:
+   - `tooltipLabelStyle = { color: "var(--color-muted-foreground)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }`
+   - `tooltipItemStyle = { color: "var(--color-foreground)", fontSize: 12 }`
+   - `legendStyle = { fontSize: 11, color: "var(--color-foreground)", textTransform: "capitalize" }`
+   - Pass `labelStyle={tooltipLabelStyle}` and `itemStyle={tooltipItemStyle}` on every `<Tooltip>`.
+   - Pass `wrapperStyle={legendStyle}` on every `<Legend>` and add `formatter={(v) => <span style={{ color: "var(--color-foreground)" }}>{v}</span>}` so per-item legend text overrides Recharts' hard-coded black.
 
-2. **Rework the two palette maps** to use semantic tokens instead of raw HSL literals:
-   - `SEVERITY_COLORS`: `healthy → var(--color-success)`, `mild → var(--color-primary)`, `moderate → var(--color-warn)`, `severe → var(--color-destructive)`, `unknown → var(--color-muted-foreground)`.
-   - `MODE_COLORS`: `[var(--color-primary), var(--color-warn), var(--color-accent-bright), var(--color-chart-4)]` so input-mode slices match the app's emerald/amber/mint/teal palette instead of cyan/purple/pink.
+2. **Line chart cursor + dot contrast** — change tooltip `cursor` to `{ stroke: "var(--color-accent-bright)", strokeOpacity: 0.5, strokeDasharray: "3 3" }`, and give the `Line` `dot` a `stroke: "var(--color-background)"` so points read on the dark grid.
 
-3. **Polish the chart chrome** to align with the rest of the app (matches `dashboard-charts.tsx`):
-   - Tooltip: `background var(--color-card)`, `1px solid var(--color-border)`, radius 2, font-size 12, mono-ish.
-   - Grid: `strokeDasharray="2 4"`, `vertical={false}`, stroke `var(--color-border)`.
-   - Axis ticks: `fill var(--color-muted-foreground)`, `fontSize 10`, mono family, `stroke var(--color-border)`.
-   - Line chart: add a soft `activeDot` and a second-line style consistent with the dashboard.
-   - Pie strokes: use `var(--color-card)` to get the crisp separator ring like the dashboard donut.
-   - Legend: `fontSize 11`, capitalized.
+3. **Bar cursor contrast** — replace the low-opacity `var(--color-accent)` cursor with `{ fill: "var(--color-primary)", fillOpacity: 0.08 }` so the hover band is visible but non-dominant.
 
-4. **Small readability tweaks** (no logic changes):
-   - Bar radius kept, but `Bar fill` uses `var(--color-primary)` (currently invisible).
-   - Vertical "Top Diseases" bars: give each bar a slight gradient by using `var(--color-primary)` fill and `var(--color-accent-bright)` on hover via `activeBar`.
+4. **Pie slice contrast on dark** — keep `stroke="var(--color-card)"` but add `strokeWidth={2}` and wrap the container so tiny slices (e.g. a single "healthy" category) still show a visible ring. When only one category exists, render a centered summary label ("100% Healthy") instead of a solid ring that looks black.
+
+5. **Empty-slice guard** — for both pie charts, if all values are 0, render the same "No data yet." placeholder used elsewhere instead of an empty SVG.
+
+6. **KPI strip separators** — change the `gap-px bg-border` container to `gap-px bg-background` so the 1px seams read on dark, matching the dashboard's KPI row.
+
+7. **Panel hover + focus** — bump `hover:border-primary/30` to `hover:border-primary/50` and add `focus-within:border-primary/60` so keyboard focus on a chart control is visible in dark mode.
 
 ## Not changing
 
-- Data fetching, realtime subscription, KPI logic, `computeStats`, layout/grid, header, or any other route.
-- `src/styles.css` tokens.
-- `dashboard-charts.tsx` (already correct).
+- Data fetching, realtime subscription, `computeStats`, or KPI logic.
+- The header, layout grid, or any other route.
+- `src/styles.css` tokens (dark palette is already correct).
+- `dashboard-charts.tsx` (already renders correctly on dark).
 
 ## Technical note
 
-Root cause is a CSS token format mismatch: shadcn's default `hsl(var(--token))` pattern only works when tokens are stored as `H S L` triplets. This project stores them as full `oklch(...)` colors and re-exports them via `@theme inline` as `--color-*`, so components must reference `var(--color-*)` directly.
+Recharts injects inline `color: #000` / `fill: #000` into legend items and tooltip rows regardless of parent CSS, so overriding requires explicit `labelStyle`, `itemStyle`, `wrapperStyle`, and a legend `formatter` returning styled markup. Simply setting `color` on the parent has no effect.

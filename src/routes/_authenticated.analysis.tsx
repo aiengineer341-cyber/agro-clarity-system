@@ -61,6 +61,43 @@ const axisTick = {
   fontFamily: "monospace",
 } as const;
 
+const tooltipLabelStyle = {
+  color: "var(--color-muted-foreground)",
+  fontSize: 10,
+  textTransform: "uppercase" as const,
+  letterSpacing: "0.1em",
+  marginBottom: 4,
+};
+
+const tooltipItemStyle = {
+  color: "var(--color-foreground)",
+  fontSize: 12,
+};
+
+const legendWrapperStyle = {
+  fontSize: 11,
+  color: "var(--color-foreground)",
+  textTransform: "capitalize" as const,
+};
+
+const legendFormatter = (v: string) => (
+  <span style={{ color: "var(--color-foreground)" }}>{v}</span>
+);
+
+const lineCursor = {
+  stroke: "var(--color-accent-bright)",
+  strokeOpacity: 0.5,
+  strokeDasharray: "3 3",
+};
+
+const barCursor = { fill: "var(--color-primary)", fillOpacity: 0.08 };
+
+const EmptyChart = () => (
+  <div className="h-full w-full flex items-center justify-center text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+    No data yet.
+  </div>
+);
+
 function AnalysisPage() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
@@ -173,7 +210,7 @@ function AnalysisPage() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-border ring-1 ring-border rounded-sm overflow-hidden animate-slide-up" style={{ animationDelay: "80ms" }}>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-background ring-1 ring-border rounded-sm overflow-hidden animate-slide-up" style={{ animationDelay: "80ms" }}>
             <Kpi label="Total Scans" value={String(stats.totalScans).padStart(3, "0")} />
             <Kpi label="Avg Confidence" value={`${stats.avgConfidence}%`} />
             <Kpi label="Severe Rate" value={`${stats.severeRate}%`} tone="danger" />
@@ -187,24 +224,28 @@ function AnalysisPage() {
                   <CartesianGrid strokeDasharray="2 4" stroke="var(--color-border)" vertical={false} />
                   <XAxis dataKey="day" tick={axisTick} stroke="var(--color-border)" minTickGap={20} />
                   <YAxis allowDecimals={false} tick={axisTick} stroke="var(--color-border)" />
-                  <Tooltip contentStyle={tooltipStyle} cursor={{ stroke: "var(--color-primary)", strokeOpacity: 0.3 }} />
-                  <Line type="monotone" dataKey="scans" stroke="var(--color-primary)" strokeWidth={2} dot={{ r: 2 }} activeDot={{ r: 5 }} />
+                  <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} cursor={lineCursor} />
+                  <Line type="monotone" dataKey="scans" stroke="var(--color-primary)" strokeWidth={2} dot={{ r: 2, stroke: "var(--color-background)", strokeWidth: 1 }} activeDot={{ r: 5, stroke: "var(--color-background)", strokeWidth: 2 }} />
                 </LineChart>
               </ResponsiveContainer>
             </Panel>
 
             <Panel title="Severity Mix" className="lg:col-span-4 h-[320px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={stats.severity} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90} paddingAngle={2} stroke="var(--color-card)">
-                    {stats.severity.map((s) => (
-                      <Cell key={s.name} fill={SEVERITY_COLORS[s.name] ?? SEVERITY_COLORS.unknown} />
-                    ))}
-                  </Pie>
-                  <Tooltip contentStyle={tooltipStyle} />
-                  <Legend wrapperStyle={{ fontSize: 11, textTransform: "capitalize" }} iconType="circle" />
-                </PieChart>
-              </ResponsiveContainer>
+              {stats.severity.reduce((s, x) => s + x.value, 0) === 0 ? (
+                <EmptyChart />
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={stats.severity} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90} paddingAngle={2} stroke="var(--color-card)" strokeWidth={2}>
+                      {stats.severity.map((s) => (
+                        <Cell key={s.name} fill={SEVERITY_COLORS[s.name] ?? SEVERITY_COLORS.unknown} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} />
+                    <Legend wrapperStyle={legendWrapperStyle} formatter={legendFormatter} iconType="circle" />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
             </Panel>
 
             <Panel title="Top Diseases" className="lg:col-span-7 h-[360px]">
@@ -213,7 +254,7 @@ function AnalysisPage() {
                   <CartesianGrid strokeDasharray="2 4" stroke="var(--color-border)" horizontal={false} />
                   <XAxis type="number" allowDecimals={false} tick={axisTick} stroke="var(--color-border)" />
                   <YAxis type="category" dataKey="name" width={140} tick={{ ...axisTick, fontSize: 11 }} stroke="var(--color-border)" />
-                  <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "var(--color-accent)", fillOpacity: 0.3 }} />
+                  <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} cursor={barCursor} />
                   <Bar dataKey="count" fill="var(--color-primary)" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -225,24 +266,28 @@ function AnalysisPage() {
                   <CartesianGrid strokeDasharray="2 4" stroke="var(--color-border)" vertical={false} />
                   <XAxis dataKey="name" tick={axisTick} stroke="var(--color-border)" />
                   <YAxis allowDecimals={false} tick={axisTick} stroke="var(--color-border)" />
-                  <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "var(--color-accent)", fillOpacity: 0.3 }} />
+                  <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} cursor={barCursor} />
                   <Bar dataKey="count" fill="var(--color-accent-bright)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </Panel>
 
             <Panel title="Input Mode Mix" className="lg:col-span-5 h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={stats.modes} dataKey="value" nameKey="name" innerRadius={40} outerRadius={80} paddingAngle={2} stroke="var(--color-card)">
-                    {stats.modes.map((m, i) => (
-                      <Cell key={m.name} fill={MODE_COLORS[i % MODE_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip contentStyle={tooltipStyle} />
-                  <Legend wrapperStyle={{ fontSize: 11, textTransform: "capitalize" }} iconType="circle" />
-                </PieChart>
-              </ResponsiveContainer>
+              {stats.modes.reduce((s, x) => s + x.value, 0) === 0 ? (
+                <EmptyChart />
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={stats.modes} dataKey="value" nameKey="name" innerRadius={40} outerRadius={80} paddingAngle={2} stroke="var(--color-card)" strokeWidth={2}>
+                      {stats.modes.map((m, i) => (
+                        <Cell key={m.name} fill={MODE_COLORS[i % MODE_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} />
+                    <Legend wrapperStyle={legendWrapperStyle} formatter={legendFormatter} iconType="circle" />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
             </Panel>
 
             <Panel title="Confidence by Severity" className="lg:col-span-7 h-[300px]">
@@ -251,7 +296,7 @@ function AnalysisPage() {
                   <CartesianGrid strokeDasharray="2 4" stroke="var(--color-border)" vertical={false} />
                   <XAxis dataKey="name" tick={axisTick} stroke="var(--color-border)" />
                   <YAxis domain={[0, 100]} tick={axisTick} stroke="var(--color-border)" />
-                  <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "var(--color-accent)", fillOpacity: 0.3 }} formatter={(v: number) => `${v}%`} />
+                  <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} cursor={barCursor} formatter={(v: number) => `${v}%`} />
                   <Bar dataKey="avg" radius={[4, 4, 0, 0]}>
                     {stats.confBySeverity.map((s) => (
                       <Cell key={s.name} fill={SEVERITY_COLORS[s.name] ?? SEVERITY_COLORS.unknown} />
@@ -269,7 +314,7 @@ function AnalysisPage() {
 
 function Panel({ title, children, className = "" }: { title: string; children: React.ReactNode; className?: string }) {
   return (
-    <section className={`rounded-sm border border-border bg-card p-5 flex flex-col hover:border-primary/30 transition-colors animate-slide-up ${className}`}>
+    <section className={`rounded-sm border border-border bg-card p-5 flex flex-col hover:border-primary/50 focus-within:border-primary/60 transition-colors animate-slide-up ${className}`}>
       <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground mb-3">{title}</h2>
       <div className="flex-1 min-h-0">{children}</div>
     </section>
