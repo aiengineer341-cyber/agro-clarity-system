@@ -5,9 +5,10 @@ import { detectDisease } from "@/lib/detect.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { SeverityBadge, UrgencyDot } from "@/components/severity-badge";
 import { toast } from "sonner";
-import { Upload, ScanLine, Loader2, Camera, Mic, Type, MicOff, X, Video, Save, Check, Volume2, VolumeX } from "lucide-react";
+import { Upload, ScanLine, Loader2, Camera, Mic, Type, MicOff, X, Video, Save, Check, Volume2, VolumeX, Radio } from "lucide-react";
 import { startScanSound, stopScanSound } from "@/lib/scan-audio";
 import { speak, stopSpeaking } from "@/lib/tts-client";
+import { useVoiceCommands } from "@/lib/use-voice-commands";
 
 export const Route = createFileRoute("/_authenticated/detect")({
   head: () => ({
@@ -71,6 +72,42 @@ function DetectPage() {
   // Voice (Web Speech API)
   const recogRef = useRef<unknown>(null);
   const [listening, setListening] = useState(false);
+
+  // Latest state refs so voice-command handlers always see current values
+  const resultRef = useRef<Result | null>(null);
+  const loadingRef = useRef(false);
+  useEffect(() => { resultRef.current = result; }, [result]);
+  useEffect(() => { loadingRef.current = loading; }, [loading]);
+  const analyseRef = useRef<() => void>(() => {});
+
+  const speakTop = () => {
+    const r = resultRef.current;
+    const top = r?.predictions?.[0];
+    if (!top) { say("No results to repeat yet."); return; }
+    const pct = Math.round(top.confidence * 100);
+    const firstTreatment = (top.treatment || "").split(/[.\n]/)[0];
+    say(`Most likely ${top.disease} at ${pct} percent confidence. Severity ${top.severity}, urgency ${top.urgency}. ${firstTreatment}.`);
+  };
+
+  const commands = useVoiceCommands(
+    {
+      onStart: () => {
+        if (loadingRef.current) return;
+        toast.info("Voice command: start scan");
+        analyseRef.current();
+      },
+      onStop: () => {
+        toast.info("Voice command: stop");
+        stopScanSound();
+        stopSpeaking();
+      },
+      onRepeat: () => {
+        toast.info("Voice command: repeat results");
+        speakTop();
+      },
+    },
+    { paused: mode === "voice" && listening },
+  );
 
   // Best-effort geolocation
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
@@ -208,6 +245,7 @@ function DetectPage() {
       stopScanSound();
     }
   };
+  useEffect(() => { analyseRef.current = analyse; });
 
   const save = async () => {
     if (!result || !result.predictions.length) return;
@@ -444,16 +482,29 @@ function DetectPage() {
             Diagnosis · Ranked Predictions
           </h2>
           <div className="flex items-center justify-between -mt-2">
-            <p className="text-[10px] font-mono text-muted-foreground/70">Voice narration {voiceEnabled ? "on" : "off"}</p>
+            <p className="text-[10px] font-mono text-muted-foreground/70">
+              Narration {voiceEnabled ? "on" : "off"}
+              {commands.supported && <> · Commands {commands.listening ? "listening" : "off"}</>}
+              {commands.lastCommand && <> · "{commands.lastCommand}"</>}
+            </p>
             <div className="flex items-center gap-1">
+              {commands.supported && (
+                <button
+                  onClick={commands.toggle}
+                  className={`p-1.5 rounded-sm border transition-colors ${
+                    commands.listening
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border hover:bg-background"
+                  }`}
+                  aria-label={commands.listening ? "Disable voice commands" : "Enable voice commands"}
+                  title={commands.listening ? "Voice commands on — say 'start scan', 'stop scan', or 'repeat results'" : "Enable voice commands"}
+                >
+                  <Radio className="size-3.5" />
+                </button>
+              )}
               {result?.predictions?.[0] && voiceEnabled && (
                 <button
-                  onClick={() => {
-                    const top = result.predictions[0];
-                    const pct = Math.round(top.confidence * 100);
-                    const firstTreatment = (top.treatment || "").split(/[.\n]/)[0];
-                    say(`Most likely ${top.disease} at ${pct} percent confidence. Severity ${top.severity}, urgency ${top.urgency}. ${firstTreatment}.`);
-                  }}
+                  onClick={speakTop}
                   className="p-1.5 rounded-sm border border-border hover:bg-background transition-colors"
                   aria-label="Replay narration"
                   title="Replay narration"
