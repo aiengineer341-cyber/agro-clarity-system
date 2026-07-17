@@ -1,41 +1,47 @@
-## Context
+# Add Scan Sounds & Voice Narration to Detection
 
-The app is dark-mode only (`:root` in `src/styles.css` already defines the dark palette; there is no light theme to switch to). After the last change, chart fills and axes use theme tokens correctly, but a few Recharts elements still don't inherit the dark palette:
+Layer audio feedback onto the existing Detect flow: a background scanning sound while the AI is working, and spoken narration (text-to-speech) of each stage and the final diagnosis.
 
-- **Legend text** — Recharts renders legend labels with an inline `color: #000` by default, which is unreadable on the dark card background.
-- **Tooltip label + item text** — `contentStyle` only styles the wrapper; the item name/value use `itemStyle` / `labelStyle` and default to near-black.
-- **Tooltip cursor on line charts** — currently a faint primary stroke, hard to see on dark.
-- **Pie slice separators** — thin `var(--color-card)` stroke is fine, but very small slices disappear on dark; add a subtle outer stroke.
-- **KPI strip divider** — `bg-border` gap is nearly invisible on dark; bump to `bg-background` for crisper separators like the dashboard.
+## What the user will experience
 
-## Fix (scope: `src/routes/_authenticated.analysis.tsx` only)
+1. Presses **Run Diagnosis** on `/detect` (upload, camera, voice, or text mode).
+2. A soft looping "scanner" sound plays while the request is in flight.
+3. A calm voice narrates the steps: "Scanning image… analysing symptoms… consulting knowledge base… diagnosis ready."
+4. When results arrive: sound stops, voice reads out the top prediction — disease name, confidence, severity, urgency, and the first line of treatment.
+5. A small **speaker toggle** in the result panel lets users mute/replay narration, and preferences persist in localStorage.
 
-1. **Global chart text defaults** — introduce shared style objects and apply them everywhere:
-   - `tooltipLabelStyle = { color: "var(--color-muted-foreground)", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }`
-   - `tooltipItemStyle = { color: "var(--color-foreground)", fontSize: 12 }`
-   - `legendStyle = { fontSize: 11, color: "var(--color-foreground)", textTransform: "capitalize" }`
-   - Pass `labelStyle={tooltipLabelStyle}` and `itemStyle={tooltipItemStyle}` on every `<Tooltip>`.
-   - Pass `wrapperStyle={legendStyle}` on every `<Legend>` and add `formatter={(v) => <span style={{ color: "var(--color-foreground)" }}>{v}</span>}` so per-item legend text overrides Recharts' hard-coded black.
+## Technical approach
 
-2. **Line chart cursor + dot contrast** — change tooltip `cursor` to `{ stroke: "var(--color-accent-bright)", strokeOpacity: 0.5, strokeDasharray: "3 3" }`, and give the `Line` `dot` a `stroke: "var(--color-background)"` so points read on the dark grid.
+**Audio (scan sound)**
+- Use Web Audio API to synthesize the scanner tone in-browser (two soft oscillators + gentle sweep). No asset download needed, works offline, respects volume.
+- Small helper `src/lib/scan-audio.ts` exposing `startScanSound()` / `stopScanSound()`.
+- Started when `analyse()` begins, stopped in the `finally` block; also stopped on unmount.
 
-3. **Bar cursor contrast** — replace the low-opacity `var(--color-accent)` cursor with `{ fill: "var(--color-primary)", fillOpacity: 0.08 }` so the hover band is visible but non-dominant.
+**Voice narration (TTS)**
+- Use Lovable AI Gateway `openai/gpt-4o-mini-tts` (SSE streaming, PCM) via a new server function so the API key stays server-side.
+- New server route `src/routes/api/tts.ts` (public-safe: rate-limited by auth middleware; only accepts short text). Returns `text/event-stream`.
+- Client helper `src/lib/tts-client.ts` with `speak(text)` and `stopSpeaking()` using the streaming PCM playback pattern from `ai-text-to-speech`.
+- Fallback: if the gateway call fails or is unavailable, silently fall back to the browser's built-in `speechSynthesis` so narration still works.
 
-4. **Pie slice contrast on dark** — keep `stroke="var(--color-card)"` but add `strokeWidth={2}` and wrap the container so tiny slices (e.g. a single "healthy" category) still show a visible ring. When only one category exists, render a centered summary label ("100% Healthy") instead of a solid ring that looks black.
+**Detect page wiring** (`src/routes/_authenticated.detect.tsx`)
+- Add `voiceEnabled` state (persisted in localStorage, default on).
+- Speaker toggle button (Volume2 / VolumeX icon) next to the "Diagnosis" heading.
+- On `analyse()` start: `startScanSound()` + `speak("Scanning… analysing symptoms with the knowledge base.")`.
+- On success: `stopScanSound()` + `speak(<top prediction summary>)`.
+- On error: `stopScanSound()` + `speak("Analysis failed. Please try again.")`.
+- Cleanup on unmount and when the user toggles voice off.
 
-5. **Empty-slice guard** — for both pie charts, if all values are 0, render the same "No data yet." placeholder used elsewhere instead of an empty SVG.
+**No changes to** database, RAG logic, history, analytics, or auth.
 
-6. **KPI strip separators** — change the `gap-px bg-border` container to `gap-px bg-background` so the 1px seams read on dark, matching the dashboard's KPI row.
+## Files
 
-7. **Panel hover + focus** — bump `hover:border-primary/30` to `hover:border-primary/50` and add `focus-within:border-primary/60` so keyboard focus on a chart control is visible in dark mode.
+- Add `src/lib/scan-audio.ts` — Web Audio scanner tone.
+- Add `src/lib/tts-client.ts` — streaming PCM playback + speechSynthesis fallback.
+- Add `src/routes/api/tts.ts` — server route proxying Lovable AI TTS.
+- Edit `src/routes/_authenticated.detect.tsx` — trigger sound + narration, add speaker toggle.
 
-## Not changing
+## Out of scope
 
-- Data fetching, realtime subscription, `computeStats`, or KPI logic.
-- The header, layout grid, or any other route.
-- `src/styles.css` tokens (dark palette is already correct).
-- `dashboard-charts.tsx` (already renders correctly on dark).
-
-## Technical note
-
-Recharts injects inline `color: #000` / `fill: #000` into legend items and tooltip rows regardless of parent CSS, so overriding requires explicit `labelStyle`, `itemStyle`, `wrapperStyle`, and a legend `formatter` returning styled markup. Simply setting `color` on the parent has no effect.
+- Narrating the Analytics or History pages (this plan is Detect-only; happy to extend after).
+- Downloadable audio of diagnoses.
+- Multi-language voices (English only for now).
