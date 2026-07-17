@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as PublicRouteImport } from './routes/_public'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as PublicIndexRouteImport } from './routes/_public.index'
+import { Route as ApiTtsRouteImport } from './routes/api/tts'
 import { Route as PublicTeamRouteImport } from './routes/_public.team'
 import { Route as PublicResearchRouteImport } from './routes/_public.research'
 import { Route as PublicContactRouteImport } from './routes/_public.contact'
@@ -46,6 +47,11 @@ const PublicIndexRoute = PublicIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => PublicRoute,
+} as any)
+const ApiTtsRoute = ApiTtsRouteImport.update({
+  id: '/api/tts',
+  path: '/api/tts',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PublicTeamRoute = PublicTeamRouteImport.update({
   id: '/team',
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof PublicContactRoute
   '/research': typeof PublicResearchRoute
   '/team': typeof PublicTeamRoute
+  '/api/tts': typeof ApiTtsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
@@ -120,6 +127,7 @@ export interface FileRoutesByTo {
   '/contact': typeof PublicContactRoute
   '/research': typeof PublicResearchRoute
   '/team': typeof PublicTeamRoute
+  '/api/tts': typeof ApiTtsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -136,6 +144,7 @@ export interface FileRoutesById {
   '/_public/contact': typeof PublicContactRoute
   '/_public/research': typeof PublicResearchRoute
   '/_public/team': typeof PublicTeamRoute
+  '/api/tts': typeof ApiTtsRoute
   '/_public/': typeof PublicIndexRoute
 }
 export interface FileRouteTypes {
@@ -153,6 +162,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/research'
     | '/team'
+    | '/api/tts'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -167,6 +177,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/research'
     | '/team'
+    | '/api/tts'
   id:
     | '__root__'
     | '/_authenticated'
@@ -182,6 +193,7 @@ export interface FileRouteTypes {
     | '/_public/contact'
     | '/_public/research'
     | '/_public/team'
+    | '/api/tts'
     | '/_public/'
   fileRoutesById: FileRoutesById
 }
@@ -190,6 +202,7 @@ export interface RootRouteChildren {
   PublicRoute: typeof PublicRouteWithChildren
   AuthRoute: typeof AuthRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ApiTtsRoute: typeof ApiTtsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -228,6 +241,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof PublicIndexRouteImport
       parentRoute: typeof PublicRoute
+    }
+    '/api/tts': {
+      id: '/api/tts'
+      path: '/api/tts'
+      fullPath: '/api/tts'
+      preLoaderRoute: typeof ApiTtsRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_public/team': {
       id: '/_public/team'
@@ -339,6 +359,7 @@ const rootRouteChildren: RootRouteChildren = {
   PublicRoute: PublicRouteWithChildren,
   AuthRoute: AuthRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ApiTtsRoute: ApiTtsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

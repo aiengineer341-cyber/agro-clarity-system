@@ -5,7 +5,9 @@ import { detectDisease } from "@/lib/detect.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { SeverityBadge, UrgencyDot } from "@/components/severity-badge";
 import { toast } from "sonner";
-import { Upload, ScanLine, Loader2, Camera, Mic, Type, MicOff, X, Video, Save, Check } from "lucide-react";
+import { Upload, ScanLine, Loader2, Camera, Mic, Type, MicOff, X, Video, Save, Check, Volume2, VolumeX } from "lucide-react";
+import { startScanSound, stopScanSound } from "@/lib/scan-audio";
+import { speak, stopSpeaking } from "@/lib/tts-client";
 
 export const Route = createFileRoute("/_authenticated/detect")({
   head: () => ({
@@ -51,6 +53,16 @@ function DetectPage() {
   const [expanded, setExpanded] = useState<number>(0);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const [voiceEnabled, setVoiceEnabled] = useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    return window.localStorage.getItem("ugas.voice") !== "0";
+  });
+  useEffect(() => {
+    if (typeof window !== "undefined") window.localStorage.setItem("ugas.voice", voiceEnabled ? "1" : "0");
+    if (!voiceEnabled) stopSpeaking();
+  }, [voiceEnabled]);
+  const say = (text: string) => { if (voiceEnabled) void speak(text); };
+
   // Camera (live capture)
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -83,7 +95,7 @@ function DetectPage() {
     setListening(false);
   };
 
-  useEffect(() => () => { stopCamera(); stopVoice(); }, []);
+  useEffect(() => () => { stopCamera(); stopVoice(); stopScanSound(); stopSpeaking(); }, []);
 
   // Switch mode → cleanup other inputs
   useEffect(() => {
@@ -167,6 +179,8 @@ function DetectPage() {
     }
     setLoading(true);
     setSaved(false);
+    startScanSound();
+    say("Scanning input. Analysing symptoms with the knowledge base.");
     try {
       const r = (await run({
         data: {
@@ -178,10 +192,20 @@ function DetectPage() {
       setResult(r);
       setExpanded(0);
       toast.success("Diagnosis complete");
+      const top = r.predictions?.[0];
+      if (top) {
+        const pct = Math.round(top.confidence * 100);
+        const firstTreatment = (top.treatment || "").split(/[.\n]/)[0];
+        say(`Diagnosis ready. Most likely ${top.disease} at ${pct} percent confidence. Severity ${top.severity}, urgency ${top.urgency}. ${firstTreatment}.`);
+      } else {
+        say("Diagnosis complete. No confident matches found.");
+      }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Detection failed");
+      say("Analysis failed. Please try again.");
     } finally {
       setLoading(false);
+      stopScanSound();
     }
   };
 
@@ -419,6 +443,34 @@ function DetectPage() {
           <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
             Diagnosis · Ranked Predictions
           </h2>
+          <div className="flex items-center justify-between -mt-2">
+            <p className="text-[10px] font-mono text-muted-foreground/70">Voice narration {voiceEnabled ? "on" : "off"}</p>
+            <div className="flex items-center gap-1">
+              {result?.predictions?.[0] && voiceEnabled && (
+                <button
+                  onClick={() => {
+                    const top = result.predictions[0];
+                    const pct = Math.round(top.confidence * 100);
+                    const firstTreatment = (top.treatment || "").split(/[.\n]/)[0];
+                    say(`Most likely ${top.disease} at ${pct} percent confidence. Severity ${top.severity}, urgency ${top.urgency}. ${firstTreatment}.`);
+                  }}
+                  className="p-1.5 rounded-sm border border-border hover:bg-background transition-colors"
+                  aria-label="Replay narration"
+                  title="Replay narration"
+                >
+                  <ScanLine className="size-3.5" />
+                </button>
+              )}
+              <button
+                onClick={() => { setVoiceEnabled((v) => !v); stopSpeaking(); }}
+                className="p-1.5 rounded-sm border border-border hover:bg-background transition-colors"
+                aria-label={voiceEnabled ? "Mute narration" : "Enable narration"}
+                title={voiceEnabled ? "Mute narration" : "Enable narration"}
+              >
+                {voiceEnabled ? <Volume2 className="size-3.5" /> : <VolumeX className="size-3.5" />}
+              </button>
+            </div>
+          </div>
           <div className="rounded-sm border border-border bg-card p-6 min-h-[300px]">
             {!result || result.predictions.length === 0 ? (
               <div className="h-full grid place-items-center py-12 text-center">
