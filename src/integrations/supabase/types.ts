@@ -237,6 +237,33 @@ export type Database = {
         }
         Relationships: []
       }
+      tts_audit_log: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          status_code: number
+          text_length: number | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          status_code: number
+          text_length?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          status_code?: number
+          text_length?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
