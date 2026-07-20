@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { Logo } from "@/components/logo";
 import { toast } from "sonner";
 import { ArrowRight } from "lucide-react";
@@ -62,16 +61,21 @@ function AuthPage() {
   const signInWithGoogle = async () => {
     setGoogleLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+      // Use Supabase's Google provider directly so OAuth works on any host
+      // (including non-Lovable deployments such as Vercel), not just the
+      // Lovable-managed /~oauth/* broker paths.
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: { prompt: "select_account" },
+        },
       });
-      if (result.error) throw result.error;
-      if (result.redirected) return;
-      navigate({ to: "/dashboard" });
+      if (error) throw error;
+      // Browser is redirecting to Google; nothing else to do here.
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Google sign-in failed";
       toast.error(msg);
-    } finally {
       setGoogleLoading(false);
     }
   };
