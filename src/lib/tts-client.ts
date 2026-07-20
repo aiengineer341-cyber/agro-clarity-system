@@ -1,4 +1,5 @@
 // Client-side TTS: streams PCM from /api/tts (Lovable AI) with a browser speechSynthesis fallback.
+import { supabase } from "@/integrations/supabase/client";
 let currentCtx: AudioContext | null = null;
 let currentAbort: AbortController | null = null;
 let usingFallback = false;
@@ -38,9 +39,15 @@ export async function speak(text: string) {
   currentAbort = abort;
 
   try {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token;
+    if (!token) throw new Error("tts: not signed in");
     const res = await fetch("/api/tts", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify({ text }),
       signal: abort.signal,
     });
