@@ -545,6 +545,11 @@ function DetectPage() {
                 <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
                   {result.crop} · {result.predictions.length} candidates · {result.rag_docs_used ?? 0} RAG docs
                 </p>
+                {result.weather && (
+                  <p className="text-[11px] font-mono text-muted-foreground/90 rounded-sm border border-border/60 bg-background px-2 py-1.5">
+                    <span className="text-primary">Weather</span> · {result.weather.temp_c ?? "?"}°C · {result.weather.humidity_pct ?? "?"}% RH · {result.weather.condition} · {result.weather.rain_3d_mm ?? 0}mm/3d
+                  </p>
+                )}
                 <ul className="space-y-2">
                   {result.predictions.map((p, i) => (
                     <PredictionRow
@@ -624,6 +629,7 @@ function PredictionRow({
       {open && (
         <div className="px-3 pb-3 pt-1 space-y-3 border-t border-border/60">
           {p.rationale && <Section title="Rationale" body={p.rationale} />}
+          {p.weather_precaution && <Section title="Weather Precaution" body={p.weather_precaution} />}
           <Section title="Symptoms" body={p.symptoms} />
           <Section title="Treatment Protocol" body={p.treatment} />
           <Section title="Prevention" body={p.prevention} />
