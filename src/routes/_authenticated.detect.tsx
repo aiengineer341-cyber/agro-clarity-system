@@ -30,12 +30,19 @@ type Prediction = {
   disease: string; confidence: number; severity: string;
   symptoms: string; treatment: string; urgency: string; prevention: string;
   rationale?: string;
+  weather_precaution?: string;
+};
+type WeatherSnapshot = {
+  temp_c: number | null; humidity_pct: number | null; precip_mm: number | null;
+  rain_3d_mm: number | null; wind_kmh: number | null; condition: string; summary: string;
+  fetched_at: string; lat: number; lng: number;
 };
 type Result = {
   crop: string;
   predictions: Prediction[];
   rag_docs_used?: number;
   model?: string;
+  weather?: WeatherSnapshot | null;
 };
 
 type Mode = "upload" | "camera" | "voice" | "text";
@@ -224,6 +231,8 @@ function DetectPage() {
           imageBase64: hasImage ? image! : undefined,
           description: hasText ? description.trim() : undefined,
           crop,
+          lat: coords?.lat,
+          lng: coords?.lng,
         },
       })) as unknown as Result;
       setResult(r);
@@ -293,6 +302,7 @@ function DetectPage() {
         model: result.model ?? null,
         lat: coords?.lat ?? null,
         lng: coords?.lng ?? null,
+        weather: result.weather ?? null,
       }));
       const { error: insErr } = await supabase.from("detections").insert(rows);
       if (insErr) throw insErr;
@@ -535,6 +545,11 @@ function DetectPage() {
                 <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
                   {result.crop} · {result.predictions.length} candidates · {result.rag_docs_used ?? 0} RAG docs
                 </p>
+                {result.weather && (
+                  <p className="text-[11px] font-mono text-muted-foreground/90 rounded-sm border border-border/60 bg-background px-2 py-1.5">
+                    <span className="text-primary">Weather</span> · {result.weather.temp_c ?? "?"}°C · {result.weather.humidity_pct ?? "?"}% RH · {result.weather.condition} · {result.weather.rain_3d_mm ?? 0}mm/3d
+                  </p>
+                )}
                 <ul className="space-y-2">
                   {result.predictions.map((p, i) => (
                     <PredictionRow
@@ -614,6 +629,7 @@ function PredictionRow({
       {open && (
         <div className="px-3 pb-3 pt-1 space-y-3 border-t border-border/60">
           {p.rationale && <Section title="Rationale" body={p.rationale} />}
+          {p.weather_precaution && <Section title="Weather Precaution" body={p.weather_precaution} />}
           <Section title="Symptoms" body={p.symptoms} />
           <Section title="Treatment Protocol" body={p.treatment} />
           <Section title="Prevention" body={p.prevention} />

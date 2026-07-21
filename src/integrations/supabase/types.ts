@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       contact_messages: {
         Row: {
           created_at: string
@@ -100,6 +121,7 @@ export type Database = {
           treatment: string | null
           urgency: string | null
           user_id: string
+          weather: Json | null
         }
         Insert: {
           confidence?: number
@@ -124,6 +146,7 @@ export type Database = {
           treatment?: string | null
           urgency?: string | null
           user_id: string
+          weather?: Json | null
         }
         Update: {
           confidence?: number
@@ -148,6 +171,7 @@ export type Database = {
           treatment?: string | null
           urgency?: string | null
           user_id?: string
+          weather?: Json | null
         }
         Relationships: [
           {
@@ -264,6 +288,36 @@ export type Database = {
         }
         Relationships: []
       }
+      tts_audit_log_archive: {
+        Row: {
+          archived_at: string
+          created_at: string
+          error_message: string | null
+          id: string
+          status_code: number
+          text_length: number | null
+          user_id: string | null
+        }
+        Insert: {
+          archived_at?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          status_code: number
+          text_length?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          archived_at?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          status_code?: number
+          text_length?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
@@ -287,6 +341,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_tts_retention_days: { Args: never; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -294,6 +349,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      purge_tts_audit_log: { Args: never; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "extension_officer" | "farmer"

@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.get_tts_retention_days() FROM authenticated;
