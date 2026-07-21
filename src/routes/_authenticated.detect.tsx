@@ -30,12 +30,19 @@ type Prediction = {
   disease: string; confidence: number; severity: string;
   symptoms: string; treatment: string; urgency: string; prevention: string;
   rationale?: string;
+  weather_precaution?: string;
+};
+type WeatherSnapshot = {
+  temp_c: number | null; humidity_pct: number | null; precip_mm: number | null;
+  rain_3d_mm: number | null; wind_kmh: number | null; condition: string; summary: string;
+  fetched_at: string; lat: number; lng: number;
 };
 type Result = {
   crop: string;
   predictions: Prediction[];
   rag_docs_used?: number;
   model?: string;
+  weather?: WeatherSnapshot | null;
 };
 
 type Mode = "upload" | "camera" | "voice" | "text";
@@ -224,6 +231,8 @@ function DetectPage() {
           imageBase64: hasImage ? image! : undefined,
           description: hasText ? description.trim() : undefined,
           crop,
+          lat: coords?.lat,
+          lng: coords?.lng,
         },
       })) as unknown as Result;
       setResult(r);
@@ -293,6 +302,7 @@ function DetectPage() {
         model: result.model ?? null,
         lat: coords?.lat ?? null,
         lng: coords?.lng ?? null,
+        weather: result.weather ?? null,
       }));
       const { error: insErr } = await supabase.from("detections").insert(rows);
       if (insErr) throw insErr;
