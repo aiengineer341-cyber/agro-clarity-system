@@ -25,6 +25,7 @@ import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedDetectRouteImport } from './routes/_authenticated.detect'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedAnalysisRouteImport } from './routes/_authenticated.analysis'
+import { Route as AuthenticatedAdminRetentionRouteImport } from './routes/_authenticated.admin.retention'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -104,6 +105,12 @@ const AuthenticatedAnalysisRoute = AuthenticatedAnalysisRouteImport.update({
   path: '/analysis',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedAdminRetentionRoute =
+  AuthenticatedAdminRetentionRouteImport.update({
+    id: '/admin/retention',
+    path: '/admin/retention',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
@@ -120,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/team': typeof PublicTeamRoute
   '/api/tts': typeof ApiTtsRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/admin/retention': typeof AuthenticatedAdminRetentionRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
@@ -136,6 +144,7 @@ export interface FileRoutesByTo {
   '/team': typeof PublicTeamRoute
   '/api/tts': typeof ApiTtsRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/admin/retention': typeof AuthenticatedAdminRetentionRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -155,6 +164,7 @@ export interface FileRoutesById {
   '/api/tts': typeof ApiTtsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/_public/': typeof PublicIndexRoute
+  '/_authenticated/admin/retention': typeof AuthenticatedAdminRetentionRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
     | '/team'
     | '/api/tts'
     | '/auth/callback'
+    | '/admin/retention'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -189,6 +200,7 @@ export interface FileRouteTypes {
     | '/team'
     | '/api/tts'
     | '/auth/callback'
+    | '/admin/retention'
   id:
     | '__root__'
     | '/_authenticated'
@@ -207,6 +219,7 @@ export interface FileRouteTypes {
     | '/api/tts'
     | '/auth/callback'
     | '/_public/'
+    | '/_authenticated/admin/retention'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -331,6 +344,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAnalysisRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/admin/retention': {
+      id: '/_authenticated/admin/retention'
+      path: '/admin/retention'
+      fullPath: '/admin/retention'
+      preLoaderRoute: typeof AuthenticatedAdminRetentionRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
@@ -340,6 +360,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedDetectRoute: typeof AuthenticatedDetectRoute
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
   AuthenticatedKnowledgeRoute: typeof AuthenticatedKnowledgeRoute
+  AuthenticatedAdminRetentionRoute: typeof AuthenticatedAdminRetentionRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -348,6 +369,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDetectRoute: AuthenticatedDetectRoute,
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
   AuthenticatedKnowledgeRoute: AuthenticatedKnowledgeRoute,
+  AuthenticatedAdminRetentionRoute: AuthenticatedAdminRetentionRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
