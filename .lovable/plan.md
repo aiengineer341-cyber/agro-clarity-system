@@ -1,47 +1,50 @@
-## The Root Cause
+## 1. TTS Audit Log Retention
 
-Your app uses Lovable Cloud's **managed Google OAuth** via `lovable.auth.signInWithOAuth("google", …)`. That helper redirects the browser to `/~oauth/initiate` and expects a callback at `/~oauth/callback`. Those paths are **served by Lovable's edge proxy** — they only exist on `*.lovable.app` hosts and custom domains connected through Lovable.
+**Configurable retention window** stored in a new tiny `app_settings` table (key/value), default `tts_audit_retention_days = 30`. Admins can update it; a helper function `get_tts_retention_days()` reads it with a fallback.
 
-On `agro-clarity-system.vercel.app` those routes don't exist, so Google's redirect lands on Vercel's static handler and returns **404 — Page not found**. This is a hosting/configuration issue, not a database or RLS issue. Nothing in `supabase.auth` or the security policies is blocking sign-in.
+**Archive-then-purge** via `pg_cron` (daily at 03:00 UTC):
+- Create `tts_audit_log_archive` (same columns + `archived_at`).
+- Job moves rows older than the retention window from `tts_audit_log` into the archive, then deletes rows from the archive older than `retention_days * 6` (hard purge).
+- Wrapped in a `SECURITY DEFINER` function `purge_tts_audit_log()` owned by `postgres`; only `service_role` can EXECUTE.
+- Both tables: RLS on, admin-only SELECT (reuse `has_role(auth.uid(),'admin')`), `service_role` full access.
 
-There are two clean fixes; pick one.
+**Admin UI** (small addition to existing admin surface, or a new `/_authenticated/admin/tts-audit` route if none exists): shows current retention days, lets an admin update it, shows counts of live vs archived rows and last purge time. Non-destructive; purely reads/writes `app_settings`.
 
-## Option A — Host on Lovable (recommended, zero code)
+## 2. Weather-Aware Scan & Diagnosis
 
-1. Publish the app from Lovable (Publish button → get `*.lovable.app` URL).
-2. Optionally connect your custom domain in **Project Settings → Domains** (Lovable manages DNS + SSL + the `/~oauth/*` broker paths automatically).
-3. Point users at that URL and retire the Vercel deployment (or 301-redirect it to the Lovable domain).
+Goal: enrich each detection with the current local weather so the RAG diagnosis considers conditions like humidity, rainfall, and temperature — which materially affect fungal/bacterial disease likelihood and treatment timing.
 
-No code changes needed. Google sign-in, third-party OAuth, and the redirect callback all work out of the box because Lovable's proxy handles `/~oauth/*`.
+**Data source**: Open-Meteo (free, no API key, no secret to add). Endpoint: `https://api.open-meteo.com/v1/forecast` with `current=temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,weather_code` plus `daily=precipitation_sum` (last 3 days for disease-pressure signal).
 
-## Option B — Keep Vercel, replace managed OAuth with direct Supabase OAuth
+**Capture location**: reuse the existing `latitude` / `longitude` columns on `detections`. On the Detect page, if the browser has geolocation permission, fetch coords once per session; otherwise fall back to farm coordinates (if the user has a saved farm) or skip weather.
 
-Lovable's managed Google broker cannot run on Vercel. To keep Vercel we bypass it and call Supabase's Google provider directly:
+**Server flow** (`src/lib/detect.functions.ts`):
+1. New helper `fetchWeatherContext(lat, lon)` (server-side fetch, 5s timeout, cached in-memory 10 min per rounded coord).
+2. Pass a compact weather summary into the RAG prompt: temp °C, humidity %, precipitation today, 3-day rainfall, wind, plain-language condition.
+3. Instruct the model to (a) adjust confidence for humidity/rain-driven diseases (e.g., late blight, cassava bacterial blight boost when humid+wet), and (b) add **weather-aware precautions** to each prediction's rationale (e.g., "delay foliar spray — rain expected", "high humidity favors sporulation, prioritize sanitation").
 
-1. **Configure Google in Supabase Auth** — call `supabase--configure_social_auth` with `providers: ["google"]` so the Google provider is enabled at the Supabase project level (managed credentials).
-2. **Rewrite the Google button** in `src/routes/auth.tsx` to call:
-   ```ts
-   supabase.auth.signInWithOAuth({
-     provider: "google",
-     options: { redirectTo: `${window.location.origin}/auth/callback` },
-   })
-   ```
-   (Drop the `lovable.auth.*` call for Google on this deployment.)
-3. **Add a public callback route** `src/routes/auth.callback.tsx` that waits for `supabase.auth.getSession()` to hydrate, then navigates to `/dashboard`. Keep it outside `_authenticated/`.
-4. **Whitelist the Vercel origin** in Supabase Auth Site URL / Additional Redirect URLs:
-   - Site URL: `https://agro-clarity-system.vercel.app`
-   - Redirect URLs: `https://agro-clarity-system.vercel.app/auth/callback`, plus the Lovable preview URL and any custom domain.
-5. **Configure the Google Cloud OAuth client** (only needed if you're using your own Google credentials rather than Supabase's managed ones) — add the same callback + Supabase's `https://<project-ref>.supabase.co/auth/v1/callback` as Authorized redirect URIs.
-6. **Verify** by hard-refreshing the Vercel deployment, clicking Continue with Google, and confirming the browser round-trips through Google → Supabase → `/auth/callback` → `/dashboard`.
+**Persistence**: add `weather` `jsonb` column on `detections` (nullable) storing the snapshot used, so History/Analytics can display it and audits are reproducible. Migration includes GRANTs already in place (column addition only).
 
-Email/password sign-up already works on both hosts; no change needed there. Existing RLS and security policies are unaffected.
+**UI**:
+- Detect page: small weather chip near the scan controls ("28°C · 82% RH · rain today") once fetched; graceful skeleton/empty if unavailable.
+- Prediction cards: a "Weather precautions" line under each rationale when present.
+- History detail: show the stored weather snapshot alongside the scan.
+- Analytics: no chart changes in this pass (kept out of scope).
 
-## What is NOT the problem (so we don't rabbit-hole)
+**Failure handling**: weather fetch failures never block diagnosis — the pipeline runs without weather context and the UI simply hides the chip.
 
-- Not RLS / `has_role` / the recent security migration — those govern data access after sign-in, not the OAuth redirect.
-- Not the `_authenticated` gate — a 404 on the Google return URL happens before any route guard runs.
-- Not `redirect_uri` pointing at a protected route — the helper's underlying broker path itself is missing on Vercel.
+## Technical Notes
 
-## Pick a path
+- Migrations (single migration each):
+  - `app_settings(key text pk, value jsonb, updated_at)`, seed `tts_audit_retention_days=30`; RLS admin RW + service_role.
+  - `tts_audit_log_archive` + `purge_tts_audit_log()` + `pg_cron` schedule via `supabase--insert` (not migration, since it embeds runtime data).
+  - `alter table public.detections add column weather jsonb`.
+- No new secrets. Open-Meteo is keyless.
+- Voice/scan-sound flow untouched.
+- Existing `input_mode`, `latitude`, `longitude`, `rag_docs_used` columns are reused.
 
-Which option do you want me to execute? **A (host on Lovable)** is one click and needs no code. **B (keep Vercel)** is the code plan above — say the word and I'll implement steps 1–3 and give you the exact values to paste for steps 4–5.
+## Out of Scope
+
+- Historical backfill of weather for past detections.
+- Multi-provider weather fallback.
+- Push notifications for weather-based spray advisories.
