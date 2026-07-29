@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import { Logo } from "@/components/logo";
 import { toast } from "sonner";
 import { ArrowRight } from "lucide-react";
@@ -61,9 +62,9 @@ function AuthPage() {
   const signInWithGoogle = async () => {
     setGoogleLoading(true);
     try {
-      // Use Supabase's Google provider directly so OAuth works on any host
-      // (including non-Lovable deployments such as Vercel), not just the
-      // Lovable-managed /~oauth/* broker paths.
+      // Try Supabase's Google provider directly first — this works on any
+      // host (Vercel, custom domains) provided the project has its own
+      // Google OAuth client ID/secret configured.
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
@@ -71,8 +72,25 @@ function AuthPage() {
           queryParams: { prompt: "select_account" },
         },
       });
-      if (error) throw error;
-      // Browser is redirecting to Google; nothing else to do here.
+      if (!error) return; // browser is redirecting to Google
+
+      // "Unsupported provider: missing OAuth secret" means the project is
+      // still using Lovable-managed Google credentials, which are only
+      // reachable through the Lovable OAuth broker. Fall back to it.
+      const missingSecret = /missing oauth secret|unsupported provider/i.test(error.message);
+      if (!missingSecret) throw error;
+
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: `${window.location.origin}/auth/callback`,
+        extraParams: { prompt: "select_account" },
+      });
+      if (result.redirected) return;
+      if (result.error) {
+        throw new Error(
+          "Google sign-in isn't configured for this domain yet. Add your Google OAuth client ID and secret in Cloud → Users → Authentication Settings → Google.",
+        );
+      }
+      navigate({ to: "/dashboard" });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Google sign-in failed";
       toast.error(msg);
