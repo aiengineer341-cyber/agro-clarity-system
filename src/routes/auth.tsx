@@ -24,6 +24,7 @@ function AuthPage() {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [appleLoading, setAppleLoading] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -98,6 +99,22 @@ function AuthPage() {
     }
   };
 
+  const signInWithApple = async () => {
+    setAppleLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("apple", {
+        redirect_uri: `${window.location.origin}/auth/callback`,
+      });
+      if (result.redirected) return;
+      if (result.error) throw result.error;
+      navigate({ to: "/dashboard" });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Apple sign-in failed";
+      toast.error(msg);
+      setAppleLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background grid lg:grid-cols-2">
       <div className="hidden lg:flex flex-col justify-between p-12 border-r border-border bg-card/40">
@@ -134,17 +151,31 @@ function AuthPage() {
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={signInWithGoogle}
-            disabled={googleLoading || loading}
-            aria-label="Continue with Google"
-            className="group w-full py-3 px-4 bg-white text-[#1f1f1f] font-medium rounded-sm border border-[#dadce0] hover:shadow-md hover:border-[#d2e3fc] active:scale-[0.98] transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-            style={{ fontFamily: "'Roboto', 'Inter', system-ui, sans-serif" }}
-          >
-            <GoogleG className={`size-5 shrink-0 transition-transform duration-200 ${googleLoading ? "animate-spin" : "group-hover:scale-110"}`} />
-            <span className="text-sm">{googleLoading ? "Connecting…" : "Continue with Google"}</span>
-          </button>
+          <div className="space-y-3">
+            <button
+              type="button"
+              onClick={signInWithGoogle}
+              disabled={googleLoading || appleLoading || loading}
+              aria-label="Continue with Google"
+              className="group w-full py-3 px-4 bg-white text-[#1f1f1f] font-medium rounded-sm border border-[#dadce0] hover:shadow-md hover:border-[#d2e3fc] active:scale-[0.98] transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+              style={{ fontFamily: "'Roboto', 'Inter', system-ui, sans-serif" }}
+            >
+              <GoogleG className={`size-5 shrink-0 transition-transform duration-200 ${googleLoading ? "animate-spin" : "group-hover:scale-110"}`} />
+              <span className="text-sm">{googleLoading ? "Connecting…" : "Continue with Google"}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={signInWithApple}
+              disabled={googleLoading || appleLoading || loading}
+              aria-label="Continue with Apple"
+              className="group w-full py-3 px-4 bg-black text-white font-medium rounded-sm border border-black hover:shadow-md active:scale-[0.98] transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-3 dark:bg-white dark:text-black dark:border-white"
+              style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}
+            >
+              <AppleLogo className={`size-5 shrink-0 transition-transform duration-200 ${appleLoading ? "animate-spin" : "group-hover:scale-110"}`} />
+              <span className="text-sm">{appleLoading ? "Connecting…" : "Continue with Apple"}</span>
+            </button>
+          </div>
 
           <div className="relative py-1">
             <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
