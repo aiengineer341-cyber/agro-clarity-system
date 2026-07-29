@@ -24,6 +24,7 @@ function AuthPage() {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [appleLoading, setAppleLoading] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -98,6 +99,22 @@ function AuthPage() {
     }
   };
 
+  const signInWithApple = async () => {
+    setAppleLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("apple", {
+        redirect_uri: `${window.location.origin}/auth/callback`,
+      });
+      if (result.redirected) return;
+      if (result.error) throw result.error;
+      navigate({ to: "/dashboard" });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Apple sign-in failed";
+      toast.error(msg);
+      setAppleLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background grid lg:grid-cols-2">
       <div className="hidden lg:flex flex-col justify-between p-12 border-r border-border bg-card/40">
@@ -134,17 +151,31 @@ function AuthPage() {
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={signInWithGoogle}
-            disabled={googleLoading || loading}
-            aria-label="Continue with Google"
-            className="group w-full py-3 px-4 bg-white text-[#1f1f1f] font-medium rounded-sm border border-[#dadce0] hover:shadow-md hover:border-[#d2e3fc] active:scale-[0.98] transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-            style={{ fontFamily: "'Roboto', 'Inter', system-ui, sans-serif" }}
-          >
-            <GoogleG className={`size-5 shrink-0 transition-transform duration-200 ${googleLoading ? "animate-spin" : "group-hover:scale-110"}`} />
-            <span className="text-sm">{googleLoading ? "Connecting…" : "Continue with Google"}</span>
-          </button>
+          <div className="space-y-3">
+            <button
+              type="button"
+              onClick={signInWithGoogle}
+              disabled={googleLoading || appleLoading || loading}
+              aria-label="Continue with Google"
+              className="group w-full py-3 px-4 bg-white text-[#1f1f1f] font-medium rounded-sm border border-[#dadce0] hover:shadow-md hover:border-[#d2e3fc] active:scale-[0.98] transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+              style={{ fontFamily: "'Roboto', 'Inter', system-ui, sans-serif" }}
+            >
+              <GoogleG className={`size-5 shrink-0 transition-transform duration-200 ${googleLoading ? "animate-spin" : "group-hover:scale-110"}`} />
+              <span className="text-sm">{googleLoading ? "Connecting…" : "Continue with Google"}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={signInWithApple}
+              disabled={googleLoading || appleLoading || loading}
+              aria-label="Continue with Apple"
+              className="group w-full py-3 px-4 bg-black text-white font-medium rounded-sm border border-black hover:shadow-md active:scale-[0.98] transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-3 dark:bg-white dark:text-black dark:border-white"
+              style={{ fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}
+            >
+              <AppleLogo className={`size-5 shrink-0 transition-transform duration-200 ${appleLoading ? "animate-spin" : "group-hover:scale-110"}`} />
+              <span className="text-sm">{appleLoading ? "Connecting…" : "Continue with Apple"}</span>
+            </button>
+          </div>
 
           <div className="relative py-1">
             <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
@@ -227,6 +258,14 @@ function GoogleG({ className }: { className?: string }) {
       <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
       <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
       <path fill="none" d="M0 0h48v48H0z"/>
+    </svg>
+  );
+}
+
+function AppleLogo({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M16.365 1.43c0 1.14-.42 2.2-1.13 3.02-.85.99-2.24 1.76-3.4 1.67a3.5 3.5 0 0 1-.03-.42c0-1.1.48-2.25 1.2-3.02.84-.92 2.28-1.6 3.35-1.65.01.13.01.27.01.4zM20.5 17.06c-.35.8-.77 1.55-1.26 2.24-.67.94-1.22 1.59-1.64 1.95-.65.6-1.35.9-2.1.92-.54 0-1.19-.15-1.94-.46-.76-.31-1.45-.46-2.09-.46-.66 0-1.37.15-2.14.46-.77.31-1.39.47-1.86.49-.72.03-1.43-.28-2.14-.94-.45-.39-1.03-1.07-1.72-2.03a13.9 13.9 0 0 1-1.82-3.57C1.3 14.24 1 13.09 1 11.98c0-1.27.28-2.37.83-3.29a4.87 4.87 0 0 1 1.74-1.75 4.7 4.7 0 0 1 2.35-.66c.57 0 1.32.18 2.25.53.93.35 1.53.53 1.79.53.2 0 .86-.21 1.98-.62 1.06-.38 1.95-.54 2.68-.48 1.98.16 3.47.94 4.46 2.35-1.77 1.07-2.64 2.57-2.62 4.5.02 1.5.56 2.75 1.63 3.74.48.46 1.02.81 1.62 1.06-.13.38-.27.74-.41 1.09z"/>
     </svg>
   );
 }
