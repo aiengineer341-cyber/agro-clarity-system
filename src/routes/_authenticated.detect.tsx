@@ -32,10 +32,21 @@ type Prediction = {
   rationale?: string;
   weather_precaution?: string;
 };
+type SprayWindow = {
+  start: string; end: string; label: string; score: number;
+  reason: string; risk_level: "ideal" | "acceptable" | "poor";
+};
 type WeatherSnapshot = {
   temp_c: number | null; humidity_pct: number | null; precip_mm: number | null;
   rain_3d_mm: number | null; wind_kmh: number | null; condition: string; summary: string;
   fetched_at: string; lat: number; lng: number;
+  forecast_summary?: string;
+  rain_next_24h_mm?: number | null;
+  max_rain_prob_24h?: number | null;
+  disease_pressure?: "low" | "moderate" | "high";
+  pressure_reason?: string;
+  spray_window?: SprayWindow | null;
+  alternative_windows?: SprayWindow[];
 };
 type Result = {
   crop: string;
@@ -242,7 +253,13 @@ function DetectPage() {
       if (top) {
         const pct = Math.round(top.confidence * 100);
         const firstTreatment = (top.treatment || "").split(/[.\n]/)[0];
-        say(`Diagnosis ready. Most likely ${top.disease} at ${pct} percent confidence. Severity ${top.severity}, urgency ${top.urgency}. ${firstTreatment}.`);
+        const win = r.weather?.spray_window;
+        const timing = win
+          ? ` Best time to treat is ${win.label}, because ${win.reason}.`
+          : r.weather
+            ? " No safe spray window in the next 48 hours. Use cultural controls and wait for drier conditions."
+            : "";
+        say(`Diagnosis ready. Most likely ${top.disease} at ${pct} percent confidence. Severity ${top.severity}, urgency ${top.urgency}. ${firstTreatment}.${timing}`);
       } else {
         say("Diagnosis complete. No confident matches found.");
       }
