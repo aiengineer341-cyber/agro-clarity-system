@@ -32,10 +32,21 @@ type Prediction = {
   rationale?: string;
   weather_precaution?: string;
 };
+type SprayWindow = {
+  start: string; end: string; label: string; score: number;
+  reason: string; risk_level: "ideal" | "acceptable" | "poor";
+};
 type WeatherSnapshot = {
   temp_c: number | null; humidity_pct: number | null; precip_mm: number | null;
   rain_3d_mm: number | null; wind_kmh: number | null; condition: string; summary: string;
   fetched_at: string; lat: number; lng: number;
+  forecast_summary?: string;
+  rain_next_24h_mm?: number | null;
+  max_rain_prob_24h?: number | null;
+  disease_pressure?: "low" | "moderate" | "high";
+  pressure_reason?: string;
+  spray_window?: SprayWindow | null;
+  alternative_windows?: SprayWindow[];
 };
 type Result = {
   crop: string;
@@ -242,7 +253,13 @@ function DetectPage() {
       if (top) {
         const pct = Math.round(top.confidence * 100);
         const firstTreatment = (top.treatment || "").split(/[.\n]/)[0];
-        say(`Diagnosis ready. Most likely ${top.disease} at ${pct} percent confidence. Severity ${top.severity}, urgency ${top.urgency}. ${firstTreatment}.`);
+        const win = r.weather?.spray_window;
+        const timing = win
+          ? ` Best time to treat is ${win.label}, because ${win.reason}.`
+          : r.weather
+            ? " No safe spray window in the next 48 hours. Use cultural controls and wait for drier conditions."
+            : "";
+        say(`Diagnosis ready. Most likely ${top.disease} at ${pct} percent confidence. Severity ${top.severity}, urgency ${top.urgency}. ${firstTreatment}.${timing}`);
       } else {
         say("Diagnosis complete. No confident matches found.");
       }
@@ -546,9 +563,12 @@ function DetectPage() {
                   {result.crop} · {result.predictions.length} candidates · {result.rag_docs_used ?? 0} RAG docs
                 </p>
                 {result.weather && (
-                  <p className="text-[11px] font-mono text-muted-foreground/90 rounded-sm border border-border/60 bg-background px-2 py-1.5">
-                    <span className="text-primary">Weather</span> · {result.weather.temp_c ?? "?"}°C · {result.weather.humidity_pct ?? "?"}% RH · {result.weather.condition} · {result.weather.rain_3d_mm ?? 0}mm/3d
-                  </p>
+                  <div className="space-y-2">
+                    <p className="text-[11px] font-mono text-muted-foreground/90 rounded-sm border border-border/60 bg-background px-2 py-1.5">
+                      <span className="text-primary">Weather</span> · {result.weather.temp_c ?? "?"}°C · {result.weather.humidity_pct ?? "?"}% RH · {result.weather.condition} · {result.weather.rain_3d_mm ?? 0}mm/3d
+                    </p>
+                    <WeatherAdvisory w={result.weather} />
+                  </div>
                 )}
                 <ul className="space-y-2">
                   {result.predictions.map((p, i) => (
@@ -644,6 +664,73 @@ function Section({ title, body }: { title: string; body: string }) {
     <div>
       <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-1.5">{title}</p>
       <p className="text-sm leading-relaxed text-foreground/90">{body}</p>
+    </div>
+  );
+}
+function WeatherAdvisory({ w }: { w: WeatherSnapshot }) {
+  const win = w.spray_window ?? null;
+  const pressure = w.disease_pressure ?? null;
+  const pressureTone =
+    pressure === "high"
+      ? "border-destructive/40 text-destructive"
+      : pressure === "moderate"
+        ? "border-primary/40 text-primary"
+        : "border-border text-muted-foreground";
+  const winTone =
+    win?.risk_level === "ideal"
+      ? "border-primary/50 bg-primary/5"
+      : win?.risk_level === "acceptable"
+        ? "border-border bg-background"
+        : "border-destructive/40 bg-destructive/5";
+
+  return (
+    <div className={`rounded-sm border p-3 space-y-2 ${win ? winTone : "border-destructive/40 bg-destructive/5"}`}>
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+          Best time to treat
+        </p>
+        {pressure && (
+          <span className={`text-[9px] font-mono uppercase tracking-widest border rounded-sm px-1.5 py-0.5 ${pressureTone}`}>
+            {pressure} pressure
+          </span>
+        )}
+      </div>
+
+      {win ? (
+        <>
+          <p className="text-base font-semibold tracking-tight">{win.label}</p>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            {win.reason} · suitability {Math.round(win.score * 100)}%
+          </p>
+        </>
+      ) : (
+        <p className="text-sm text-foreground/90 leading-relaxed">
+          No safe spray window in the next 48 hours — prioritise sanitation, pruning and drainage, then treat once conditions dry out.
+        </p>
+      )}
+
+      {w.forecast_summary && (
+        <p className="text-[11px] font-mono text-muted-foreground/90">{w.forecast_summary}</p>
+      )}
+      {w.pressure_reason && (
+        <p className="text-xs text-muted-foreground leading-relaxed">{w.pressure_reason}</p>
+      )}
+
+      {!!w.alternative_windows?.length && (
+        <div className="pt-1 border-t border-border/60">
+          <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-1">
+            Backup windows
+          </p>
+          <ul className="space-y-1">
+            {w.alternative_windows.map((a) => (
+              <li key={a.start} className="text-xs text-foreground/80 flex items-center justify-between gap-2">
+                <span>{a.label}</span>
+                <span className="font-mono text-[10px] text-muted-foreground">{Math.round(a.score * 100)}%</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
