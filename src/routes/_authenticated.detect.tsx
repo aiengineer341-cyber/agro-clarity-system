@@ -563,9 +563,12 @@ function DetectPage() {
                   {result.crop} · {result.predictions.length} candidates · {result.rag_docs_used ?? 0} RAG docs
                 </p>
                 {result.weather && (
-                  <p className="text-[11px] font-mono text-muted-foreground/90 rounded-sm border border-border/60 bg-background px-2 py-1.5">
-                    <span className="text-primary">Weather</span> · {result.weather.temp_c ?? "?"}°C · {result.weather.humidity_pct ?? "?"}% RH · {result.weather.condition} · {result.weather.rain_3d_mm ?? 0}mm/3d
-                  </p>
+                  <div className="space-y-2">
+                    <p className="text-[11px] font-mono text-muted-foreground/90 rounded-sm border border-border/60 bg-background px-2 py-1.5">
+                      <span className="text-primary">Weather</span> · {result.weather.temp_c ?? "?"}°C · {result.weather.humidity_pct ?? "?"}% RH · {result.weather.condition} · {result.weather.rain_3d_mm ?? 0}mm/3d
+                    </p>
+                    <WeatherAdvisory w={result.weather} />
+                  </div>
                 )}
                 <ul className="space-y-2">
                   {result.predictions.map((p, i) => (
