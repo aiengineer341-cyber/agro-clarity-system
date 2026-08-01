@@ -667,3 +667,70 @@ function Section({ title, body }: { title: string; body: string }) {
     </div>
   );
 }
+function WeatherAdvisory({ w }: { w: WeatherSnapshot }) {
+  const win = w.spray_window ?? null;
+  const pressure = w.disease_pressure ?? null;
+  const pressureTone =
+    pressure === "high"
+      ? "border-destructive/40 text-destructive"
+      : pressure === "moderate"
+        ? "border-primary/40 text-primary"
+        : "border-border text-muted-foreground";
+  const winTone =
+    win?.risk_level === "ideal"
+      ? "border-primary/50 bg-primary/5"
+      : win?.risk_level === "acceptable"
+        ? "border-border bg-background"
+        : "border-destructive/40 bg-destructive/5";
+
+  return (
+    <div className={`rounded-sm border p-3 space-y-2 ${win ? winTone : "border-destructive/40 bg-destructive/5"}`}>
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+          Best time to treat
+        </p>
+        {pressure && (
+          <span className={`text-[9px] font-mono uppercase tracking-widest border rounded-sm px-1.5 py-0.5 ${pressureTone}`}>
+            {pressure} pressure
+          </span>
+        )}
+      </div>
+
+      {win ? (
+        <>
+          <p className="text-base font-semibold tracking-tight">{win.label}</p>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            {win.reason} · suitability {Math.round(win.score * 100)}%
+          </p>
+        </>
+      ) : (
+        <p className="text-sm text-foreground/90 leading-relaxed">
+          No safe spray window in the next 48 hours — prioritise sanitation, pruning and drainage, then treat once conditions dry out.
+        </p>
+      )}
+
+      {w.forecast_summary && (
+        <p className="text-[11px] font-mono text-muted-foreground/90">{w.forecast_summary}</p>
+      )}
+      {w.pressure_reason && (
+        <p className="text-xs text-muted-foreground leading-relaxed">{w.pressure_reason}</p>
+      )}
+
+      {!!w.alternative_windows?.length && (
+        <div className="pt-1 border-t border-border/60">
+          <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mb-1">
+            Backup windows
+          </p>
+          <ul className="space-y-1">
+            {w.alternative_windows.map((a) => (
+              <li key={a.start} className="text-xs text-foreground/80 flex items-center justify-between gap-2">
+                <span>{a.label}</span>
+                <span className="font-mono text-[10px] text-muted-foreground">{Math.round(a.score * 100)}%</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
