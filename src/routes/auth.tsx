@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { Logo } from "@/components/logo";
 import { toast } from "sonner";
 import { ArrowRight } from "lucide-react";
@@ -23,8 +22,6 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
-  const [appleLoading, setAppleLoading] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -57,38 +54,6 @@ function AuthPage() {
       toast.error(msg);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const signInWithGoogle = async () => {
-    setGoogleLoading(true);
-    try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: `${window.location.origin}/auth/callback`,
-        extraParams: { prompt: "select_account" },
-      });
-      if (result.redirected) return;
-      if (result.error) throw result.error;
-      navigate({ to: "/dashboard" });
-    } catch (err) {
-      toast.error("Google sign-in could not start. Please try again or use email sign-in.");
-      setGoogleLoading(false);
-    }
-  };
-
-  const signInWithApple = async () => {
-    setAppleLoading(true);
-    try {
-      const result = await lovable.auth.signInWithOAuth("apple", {
-        redirect_uri: `${window.location.origin}/auth/callback`,
-      });
-      if (result.redirected) return;
-      if (result.error) throw result.error;
-      navigate({ to: "/dashboard" });
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Apple sign-in failed";
-      toast.error(msg);
-      setAppleLoading(false);
     }
   };
 
