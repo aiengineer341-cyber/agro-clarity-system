@@ -17,9 +17,9 @@ export const Route = createFileRoute("/_authenticated/detect")({
       { name: "description", content: "Capture, upload, or describe a crop leaf and get ranked AI disease predictions with severity, urgency, and treatment guidance." },
       { property: "og:title", content: "Detect Crop Disease — UG AgroScan AI" },
       { property: "og:description", content: "Ranked AI disease predictions with severity, urgency, and treatment guidance." },
-      { property: "og:url", content: "https://agro-clarity-system.lovable.app/detect" },
+      { property: "og:url", content: "https://ugagroscan.app/detect" },
     ],
-    links: [{ rel: "canonical", href: "https://agro-clarity-system.lovable.app/detect" }],
+    links: [{ rel: "canonical", href: "https://ugagroscan.app/detect" }],
   }),
   component: DetectPage,
 });
