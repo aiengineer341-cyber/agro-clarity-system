@@ -23,8 +23,9 @@ export function SiteFooter() {
       <div className="max-w-7xl mx-auto px-6 py-16 grid gap-12 md:grid-cols-4">
         <div className="md:col-span-2 space-y-4">
           <Logo />
-          <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
-            AI-powered plant disease detection and agronomy intelligence — built so every farmer can diagnose, decide, and act in seconds.
+          <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
+            Crop disease diagnosis from a photo, with treatment steps and spray timing for your
+            location.
           </p>
           <div className="flex items-center gap-3 pt-2">
             {socials.map(({ href, Icon, label }) => (
@@ -34,7 +35,7 @@ export function SiteFooter() {
                 target="_blank"
                 rel="noreferrer"
                 aria-label={label}
-                className="size-9 grid place-items-center rounded-sm border border-border bg-background/40 text-muted-foreground hover:text-primary hover:border-primary/40 transition-all hover:-translate-y-0.5"
+                className="grid size-9 place-items-center rounded-full border border-border bg-background/40 text-muted-foreground transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:text-primary"
               >
                 <Icon className="size-4" />
               </a>
@@ -43,7 +44,7 @@ export function SiteFooter() {
         </div>
 
         <div className="space-y-3">
-          <h4 className="text-[11px] font-mono uppercase tracking-[0.18em] text-foreground">Explore</h4>
+          <h4 className="text-xs font-semibold uppercase tracking-[0.18em] text-foreground">Explore</h4>
           <ul className="space-y-2">
             {nav.map((n) => (
               <li key={n.to}>
@@ -56,11 +57,11 @@ export function SiteFooter() {
         </div>
 
         <div className="space-y-3">
-          <h4 className="text-[11px] font-mono uppercase tracking-[0.18em] text-foreground">Contact</h4>
+          <h4 className="text-xs font-semibold uppercase tracking-[0.18em] text-foreground">Contact</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li>
-              <a href="mailto:hello@ugagroscan.ai" className="inline-flex items-center gap-2 hover:text-primary transition-colors">
-                <Mail className="size-3.5" /> hello@ugagroscan.ai
+              <a href="mailto:hello@ugagroscan.com" className="inline-flex items-center gap-2 transition-colors hover:text-primary">
+                <Mail className="size-3.5" /> hello@ugagroscan.com
               </a>
             </li>
             <li className="inline-flex items-center gap-2">
@@ -70,9 +71,9 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="border-t border-border">
-        <div className="max-w-7xl mx-auto px-6 py-5 flex flex-col sm:flex-row gap-3 justify-between items-center text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-          <span>© {new Date().getFullYear()} UG AgroScan AI</span>
-          <span>Protocol v1.0 · Built for the field</span>
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-6 py-5 text-xs text-muted-foreground sm:flex-row">
+          <span>© {new Date().getFullYear()} UG AgroScan</span>
+          <span>Accra, Ghana</span>
         </div>
       </div>
     </footer>
