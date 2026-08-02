@@ -15,9 +15,9 @@ export const Route = createFileRoute("/_authenticated/history")({
       { name: "description", content: "Review past crop disease scans with ranked predictions, confidence scores, severity, and treatment notes." },
       { property: "og:title", content: "Detection History — UG AgroScan AI" },
       { property: "og:description", content: "Past crop disease scans with ranked predictions and confidence scores." },
-      { property: "og:url", content: "https://agro-clarity-system.lovable.app/history" },
+      { property: "og:url", content: "https://ugagroscan.app/history" },
     ],
-    links: [{ rel: "canonical", href: "https://agro-clarity-system.lovable.app/history" }],
+    links: [{ rel: "canonical", href: "https://ugagroscan.app/history" }],
   }),
   component: HistoryPage,
 });

@@ -1,78 +1,83 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Sparkles, Target, ShieldCheck, Layers } from "lucide-react";
+import { Target, ShieldCheck, Sprout } from "lucide-react";
 import heroField from "@/assets/hero-field.jpg";
+import { canonical } from "@/lib/site";
 
 export const Route = createFileRoute("/_public/about")({
   head: () => ({
     meta: [
-      { title: "About UG AgroScan — Mission & Tech Stack" },
-      { name: "description", content: "UG AgroScan is an AI-powered crop disease platform for smallholder farmers. Learn our mission, our approach, and the technology stack behind it." },
+      { title: "About UG AgroScan" },
+      { name: "description", content: "Why we built UG AgroScan: fast, low-cost crop disease diagnosis for smallholder farms that cannot reach an extension officer in time." },
       { property: "og:title", content: "About UG AgroScan" },
-      { property: "og:description", content: "The mission and tech stack behind UG AgroScan." },
+      { property: "og:description", content: "Why we built a crop disease diagnosis tool for smallholder farms." },
     ],
+    links: [{ rel: "canonical", href: canonical("/about") }],
   }),
   component: About,
 });
 
-const stack = [
-  { group: "Frontend", items: ["React 19", "TanStack Start", "TanStack Router & Query", "Tailwind CSS v4", "shadcn/ui", "Vite 7", "TypeScript"] },
-  { group: "Backend & Data", items: ["Lovable Cloud (Postgres)", "Row-Level Security", "Authentication", "Object Storage", "Edge server functions"] },
-  { group: "AI & Vision", items: ["Lovable AI Gateway", "Gemini 2.5 Flash (vision)", "RAG over agronomy corpus", "Python · TensorFlow · Keras (model training)"] },
-  { group: "Tooling", items: ["Zod validation", "Recharts analytics", "Sonner toasts", "Embla carousel", "Lucide icons"] },
+const points = [
+  {
+    Icon: ShieldCheck,
+    title: "The problem",
+    body: "Crop disease destroys a large share of every harvest. A farmer who spots an unfamiliar spot on a leaf usually waits days for advice, and by then the field has spread it.",
+  },
+  {
+    Icon: Target,
+    title: "What we do",
+    body: "A photo of the leaf returns the likely disease, how bad it is, what to apply, and when to apply it. Answers are written for someone standing in a field, not reading a report.",
+  },
+  {
+    Icon: Sprout,
+    title: "How we keep it honest",
+    body: "Every diagnosis is checked against a written agronomy reference for that crop, and local weather is used to say whether spraying today is worth it.",
+  },
 ];
 
 function About() {
   return (
     <div>
-      <section className="relative border-b border-border overflow-hidden">
-        <img src={heroField} alt="" className="absolute inset-0 w-full h-full object-cover opacity-20" />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/70 to-background" />
-        <div className="relative max-w-4xl mx-auto px-6 py-24 animate-slide-up">
-          <p className="text-[10px] font-mono uppercase tracking-widest text-primary mb-3">About UG AgroScan</p>
-          <h1 className="text-5xl md:text-6xl font-bold tracking-tight leading-[1.02]">
-            Putting an agronomist in every farmer's pocket.
+      <section className="relative overflow-hidden border-b border-border">
+        <img src={heroField} alt="" className="absolute inset-0 h-full w-full object-cover opacity-15" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/80 to-background" />
+        <div className="relative mx-auto max-w-3xl animate-slide-up px-6 py-20 md:py-28">
+          <h1 className="text-4xl font-bold leading-[1.05] tracking-tight md:text-5xl">
+            Faster answers about a sick crop
           </h1>
-          <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-            UG AgroScan is an AI-powered plant disease detection platform built for smallholder farmers, extension officers, and agricultural researchers. We turn a single phone photo into a credible, citable diagnosis — symptoms, severity, treatment, and prevention — in under a second.
+          <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
+            UG AgroScan is a diagnosis tool for smallholder farmers, extension officers and
+            agriculture students. You send a photo of the affected plant and get back a named
+            disease, a severity, a treatment, and the best window to apply it.
           </p>
         </div>
       </section>
 
-      <section className="max-w-5xl mx-auto px-6 py-20 grid md:grid-cols-3 gap-6">
-        {[
-          { Icon: Target, title: "Mission", body: "Make expert-level crop disease diagnosis instantly accessible to every farmer, regardless of geography or connectivity." },
-          { Icon: ShieldCheck, title: "Problem", body: "Plant disease causes 20–40% of global crop loss. Extension officers are spread thin and timely diagnosis is out of reach for most smallholders." },
-          { Icon: Sparkles, title: "Solution", body: "Multimodal AI grounded in a curated agronomy knowledge base produces decisions farmers can actually act on — fast." },
-        ].map((c, i) => (
-          <div key={c.title} className="rounded-md border border-border bg-card p-6 animate-slide-up" style={{ animationDelay: `${i * 80}ms` }}>
-            <c.Icon className="size-6 text-primary mb-4" />
-            <h3 className="text-lg font-semibold mb-2">{c.title}</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">{c.body}</p>
+      <section className="mx-auto grid max-w-5xl gap-6 px-6 py-16 md:grid-cols-3">
+        {points.map((c, i) => (
+          <div
+            key={c.title}
+            className="animate-slide-up rounded-2xl border border-border bg-card p-6"
+            style={{ animationDelay: `${i * 80}ms` }}
+          >
+            <c.Icon className="mb-4 size-6 text-primary" />
+            <h2 className="mb-2 text-lg font-semibold">{c.title}</h2>
+            <p className="text-sm leading-relaxed text-muted-foreground">{c.body}</p>
           </div>
         ))}
       </section>
 
-      <section className="max-w-5xl mx-auto px-6 pb-24">
-        <div className="flex items-center gap-3 mb-8">
-          <Layers className="size-5 text-primary" />
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Tech Stack</h2>
-        </div>
-        <p className="text-muted-foreground max-w-2xl mb-10">
-          UG AgroScan runs on a modern, edge-friendly stack. Every layer is chosen so the experience stays fast for farmers on slow connections, and trustworthy for researchers reviewing outputs.
-        </p>
-        <div className="grid md:grid-cols-2 gap-6">
-          {stack.map((s, i) => (
-            <div key={s.group} className="rounded-md border border-border bg-card p-6 animate-slide-up" style={{ animationDelay: `${i * 60}ms` }}>
-              <h3 className="text-[11px] font-mono uppercase tracking-widest text-primary mb-4">{s.group}</h3>
-              <ul className="grid grid-cols-2 gap-2">
-                {s.items.map((it) => (
-                  <li key={it} className="text-sm text-foreground/90 flex items-center gap-2">
-                    <span className="size-1.5 rounded-full bg-primary" /> {it}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+      <section className="mx-auto max-w-3xl px-6 pb-24">
+        <h2 className="text-2xl font-bold tracking-tight">Who it is for</h2>
+        <div className="mt-6 space-y-4 text-sm leading-relaxed text-muted-foreground">
+          <p>
+            Farms of one to twenty acres growing cassava, maize, tomato, pepper, plantain, cocoyam
+            or potato. Extension officers covering more farms than they can visit. Students and
+            researchers who need a record of what was diagnosed and when.
+          </p>
+          <p>
+            Every scan is saved to your account, so you can look back at what happened on a plot
+            last season, correct a diagnosis, and see whether disease pressure is rising or falling.
+          </p>
         </div>
       </section>
     </div>

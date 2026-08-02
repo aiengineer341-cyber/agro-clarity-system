@@ -11,9 +11,9 @@ export const Route = createFileRoute("/_authenticated/knowledge")({
       { name: "description", content: "Searchable reference library of crop diseases, symptoms, and treatments powering UG AgroScan's RAG diagnoses." },
       { property: "og:title", content: "Agronomy Knowledge Base — UG AgroScan AI" },
       { property: "og:description", content: "Searchable crop disease reference library powering RAG diagnoses." },
-      { property: "og:url", content: "https://agro-clarity-system.lovable.app/knowledge" },
+      { property: "og:url", content: "https://ugagroscan.app/knowledge" },
     ],
-    links: [{ rel: "canonical", href: "https://agro-clarity-system.lovable.app/knowledge" }],
+    links: [{ rel: "canonical", href: "https://ugagroscan.app/knowledge" }],
   }),
   component: KnowledgePage,
 });

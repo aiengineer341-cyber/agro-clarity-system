@@ -15,9 +15,9 @@ export const Route = createFileRoute("/_authenticated/analysis")({
       { name: "description", content: "Trends, severity distribution, top diseases, crops and input-mode breakdown for your UG AgroScan scans." },
       { property: "og:title", content: "Field Analytics — UG AgroScan AI" },
       { property: "og:description", content: "Visual analytics over your crop disease scan history." },
-      { property: "og:url", content: "https://agro-clarity-system.lovable.app/analysis" },
+      { property: "og:url", content: "https://ugagroscan.app/analysis" },
     ],
-    links: [{ rel: "canonical", href: "https://agro-clarity-system.lovable.app/analysis" }],
+    links: [{ rel: "canonical", href: "https://ugagroscan.app/analysis" }],
   }),
   component: AnalysisPage,
 });

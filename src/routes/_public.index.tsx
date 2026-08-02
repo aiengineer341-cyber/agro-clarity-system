@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
-import { ArrowRight, ScanLine, Database, Wifi, Leaf } from "lucide-react";
+import { ArrowRight, ScanLine, BookOpen, CloudSun } from "lucide-react";
 import heroField from "@/assets/hero-field.jpg";
 import cassava from "@/assets/carousel-cassava.jpg";
 import tomato from "@/assets/carousel-tomato.jpg";
@@ -16,10 +16,10 @@ import diseaseLeaf from "@/assets/disease-leaf.jpg";
 export const Route = createFileRoute("/_public/")({
   head: () => ({
     meta: [
-      { title: "UG AgroScan AI — Precision Plant Disease Detection" },
-      { name: "description", content: "Diagnose crop diseases in seconds with AI vision and an agronomy knowledge base. Built for cassava, maize, tomato, and more." },
-      { property: "og:title", content: "UG AgroScan AI" },
-      { property: "og:description", content: "AI-powered plant disease detection for every farmer." },
+      { title: "UG AgroScan — Crop Disease Detection from a Photo" },
+      { name: "description", content: "Photograph a leaf and get the likely disease, its severity, the treatment to use and the best time to spray. Cassava, maize, tomato, pepper, plantain and more." },
+      { property: "og:title", content: "UG AgroScan — Crop Disease Detection" },
+      { property: "og:description", content: "Diagnose crop disease from a photo, with treatment steps and spray timing." },
     ],
   }),
   component: Home,
@@ -50,49 +50,44 @@ function Home() {
         <img
           src={heroField}
           alt="Aerial view of healthy farmland"
-          className="absolute inset-0 w-full h-full object-cover opacity-25"
+          className="absolute inset-0 h-full w-full object-cover opacity-20"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/70 to-background" />
-        <div className="relative max-w-7xl mx-auto px-6 py-24 md:py-32 text-center animate-slide-up">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full mb-6">
-            <Leaf className="size-3.5 text-primary" />
-            <span className="text-[10px] font-mono uppercase tracking-widest text-primary">Precision Agriculture · v1.0</span>
-          </div>
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-[0.95]">
-            See every leaf. <br />
-            <span className="text-primary">Catch every disease.</span>
+        <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/80 to-background" />
+        <div className="relative mx-auto max-w-3xl animate-slide-up px-6 py-20 text-center md:py-28">
+          <h1 className="text-4xl font-bold leading-[1.05] tracking-tight md:text-6xl">
+            Know what's wrong with your crop <span className="text-primary">today</span>
           </h1>
-          <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            UG AgroScan turns a single phone photo into an instant agronomy diagnosis — symptoms, severity, treatment, and prevention, grounded in a curated knowledge base.
+          <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
+            Take a photo of the affected leaf. You get the likely disease, how severe it is, what to
+            apply, and the best window to spray it.
           </p>
-          <div className="mt-10 flex flex-wrap justify-center gap-3">
-            <Link to="/auth" className="inline-flex items-center gap-2 rounded-sm bg-primary px-8 py-4 text-sm font-bold text-primary-foreground hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/30 transition-all">
-              Get Started <ArrowRight className="size-4" />
+          <div className="mt-9 flex flex-wrap justify-center gap-3">
+            <Link to="/auth" className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/30 active:scale-95">
+              Scan a crop <ArrowRight className="size-4" />
             </Link>
-            <Link to="/about" className="inline-flex items-center gap-2 rounded-sm border border-border bg-card/40 px-8 py-4 text-sm font-bold hover:border-primary/30 hover:text-primary transition-colors">
-              Learn more
+            <Link to="/about" className="inline-flex items-center gap-2 rounded-full border border-border bg-card/40 px-7 py-3.5 text-sm font-semibold transition-colors hover:border-primary/30 hover:text-primary">
+              How it works
             </Link>
           </div>
         </div>
       </section>
 
       {/* Carousel */}
-      <section className="max-w-7xl mx-auto px-6 py-20">
-        <div className="flex items-end justify-between mb-8">
+      <section className="mx-auto max-w-7xl px-6 py-16">
+        <div className="mb-8 flex items-end justify-between">
           <div>
-            <p className="text-[10px] font-mono uppercase tracking-widest text-primary mb-2">In the field</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Crops we protect</h2>
+            <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Crops covered</h2>
           </div>
-          <p className="hidden md:block text-sm text-muted-foreground max-w-sm">
-            Cassava, tomato, maize, pepper, plantain and more — diagnosed across smallholder fields.
+          <p className="hidden max-w-sm text-sm text-muted-foreground md:block">
+            Cassava, tomato, maize, pepper, plantain, cocoyam and potato.
           </p>
         </div>
 
-        <div className="overflow-hidden rounded-md border border-border" ref={emblaRef}>
+        <div className="overflow-hidden rounded-2xl border border-border" ref={emblaRef}>
           <div className="flex">
             {slides.map((s, i) => (
               <div key={i} className="relative min-w-0 shrink-0 grow-0 basis-full md:basis-2/3 lg:basis-1/2 pr-3 last:pr-0">
-                <div className="group relative aspect-[16/10] overflow-hidden rounded-md">
+                <div className="group relative aspect-[16/10] overflow-hidden rounded-2xl">
                   <img
                     src={s.src}
                     alt={s.alt}
@@ -102,7 +97,7 @@ function Home() {
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/10 to-transparent" />
-                  <span className="absolute bottom-4 left-4 text-xs font-mono uppercase tracking-widest text-primary/90">{s.alt}</span>
+                  <span className="absolute bottom-4 left-4 text-xs font-medium text-foreground/90">{s.alt}</span>
                 </div>
               </div>
             ))}
@@ -111,14 +106,14 @@ function Home() {
       </section>
 
       {/* Features */}
-      <section className="max-w-7xl mx-auto px-6 pb-24">
-        <div className="grid md:grid-cols-3 gap-6">
+      <section className="mx-auto max-w-7xl px-6 pb-20">
+        <div className="grid gap-6 md:grid-cols-3">
           {[
-            { Icon: ScanLine, title: "Vision-grade diagnosis", body: "Multimodal models trained on field photography classify disease, severity and confidence in under a second.", img: cropMacro },
-            { Icon: Database, title: "Agronomy knowledge base", body: "Every diagnosis is grounded in curated, citable disease references — not model hallucinations.", img: diseaseLeaf },
-            { Icon: Wifi, title: "Edge-ready", body: "Low-bandwidth flows keep UG AgroScan usable in remote fields with weak connectivity.", img: farmerTablet },
+            { Icon: ScanLine, title: "Photo, voice or typed symptoms", body: "Upload a picture, use the camera, describe the problem out loud, or type it. Any of the four works.", img: cropMacro },
+            { Icon: BookOpen, title: "Checked against a written reference", body: "Each result is matched to a stored agronomy reference for that crop before it is shown to you.", img: diseaseLeaf },
+            { Icon: CloudSun, title: "Spray timing from local weather", body: "Rain, wind and heat for your location decide whether to spray now or wait, and we say which.", img: farmerTablet },
           ].map((f, i) => (
-            <div key={f.title} className="group relative overflow-hidden rounded-md border border-border bg-card hover:border-primary/30 hover:-translate-y-1 transition-all animate-slide-up" style={{ animationDelay: `${i * 80}ms` }}>
+            <div key={f.title} className="group animate-slide-up relative overflow-hidden rounded-2xl border border-border bg-card transition-all hover:-translate-y-1 hover:border-primary/30" style={{ animationDelay: `${i * 80}ms` }}>
               <div className="relative aspect-[4/3] overflow-hidden">
                 <img src={f.img} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-70 transition-opacity" />
                 <div className="absolute inset-0 bg-gradient-to-t from-card via-card/60 to-transparent" />
@@ -134,12 +129,14 @@ function Home() {
       </section>
 
       {/* CTA */}
-      <section className="max-w-7xl mx-auto px-6 pb-24">
-        <div className="rounded-md border border-border bg-card p-10 md:p-16 text-center animate-fade-in">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Ready to diagnose your first field?</h2>
-          <p className="mt-4 text-muted-foreground max-w-xl mx-auto">Sign in and run your first scan in under a minute. Free to start.</p>
-          <Link to="/auth" className="mt-8 inline-flex items-center gap-2 rounded-sm bg-primary px-8 py-4 text-sm font-bold text-primary-foreground hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/30 transition-all">
-            Open UG AgroScan <ArrowRight className="size-4" />
+      <section className="mx-auto max-w-7xl px-6 pb-24">
+        <div className="animate-fade-in rounded-3xl border border-border bg-card p-10 text-center md:p-14">
+          <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Run your first scan</h2>
+          <p className="mx-auto mt-4 max-w-xl text-sm text-muted-foreground">
+            Create an account with an email and password. No card needed.
+          </p>
+          <Link to="/auth" className="mt-7 inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/30 active:scale-95">
+            Get started <ArrowRight className="size-4" />
           </Link>
         </div>
       </section>
