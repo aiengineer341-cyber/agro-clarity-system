@@ -128,11 +128,12 @@ function AnalysisPage() {
     document.addEventListener("visibilitychange", onVis);
 
     let channel: ReturnType<typeof supabase.channel> | null = null;
+    let cancelled = false;
     supabase.auth.getUser().then(({ data }) => {
       const uid = data.user?.id;
-      if (!uid) return;
+      if (!uid || cancelled) return;
       channel = supabase
-        .channel("detections-analytics")
+        .channel(`detections-analytics-${uid}-${Math.random().toString(36).slice(2)}`)
         .on(
           "postgres_changes",
           { event: "*", schema: "public", table: "detections", filter: `user_id=eq.${uid}` },
@@ -142,6 +143,7 @@ function AnalysisPage() {
     });
 
     return () => {
+      cancelled = true;
       window.removeEventListener("focus", onFocus);
       document.removeEventListener("visibilitychange", onVis);
       if (channel) supabase.removeChannel(channel);
