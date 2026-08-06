@@ -83,10 +83,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "author", content: SITE_NAME },
       { name: "theme-color", content: "#0b0f14" },
       { property: "og:title", content: "UG AgroScan — Crop Disease Detection" },
-      { property: "og:description", content: "Diagnose crop disease from a photo, with treatment steps and spray timing." },
+      { property: "og:description", content: "Photograph a crop leaf and get a named disease, severity, treatment and the best time to spray. Built for smallholder farms." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@ugagroscan" },
+      { name: "twitter:title", content: "UG AgroScan — Crop Disease Detection" },
+      { name: "twitter:description", content: "Photograph a crop leaf and get a named disease, severity, treatment and the best time to spray. Built for smallholder farms." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/82b81af7-6fa1-4d54-b9b0-49bc6b774bca/id-preview-6c39e904--fc18c52b-f234-4fb5-9f52-83ec2c6f0e90.lovable.app-1786016626228.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/82b81af7-6fa1-4d54-b9b0-49bc6b774bca/id-preview-6c39e904--fc18c52b-f234-4fb5-9f52-83ec2c6f0e90.lovable.app-1786016626228.png" },
     ],
     links: [
       {
