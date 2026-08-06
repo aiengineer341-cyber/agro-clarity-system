@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { BookOpen } from "lucide-react";
+import { BookOpen, RefreshCw } from "lucide-react";
 import diseaseLeaf from "@/assets/disease-leaf.jpg";
+import { listDiseaseDocs } from "@/lib/knowledge.functions";
+import { friendlyError } from "@/lib/errors";
 
 export const Route = createFileRoute("/_authenticated/knowledge")({
   head: () => ({
@@ -27,13 +29,40 @@ function KnowledgePage() {
   const [q, setQ] = useState("");
   const [crop, setCrop] = useState<string>("All");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data, error: dbError } = await supabase
+        .from("disease_docs")
+        .select("id,title,crop,content")
+        .order("title");
+      if (dbError) throw dbError;
+      if (data && data.length) {
+        setDocs(data as Doc[]);
+        return;
+      }
+      // Empty or blocked in the browser — retry through the server.
+      const fallback = (await listDiseaseDocs()) as Doc[];
+      setDocs(fallback);
+    } catch (e) {
+      try {
+        const fallback = (await listDiseaseDocs()) as Doc[];
+        setDocs(fallback);
+      } catch (e2) {
+        setDocs([]);
+        setError(friendlyError(e2 ?? e, "We couldn't load the reference library. Retry in a moment."));
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    supabase.from("disease_docs").select("id,title,crop,content").order("title").then(({ data }) => {
-      setDocs((data as Doc[]) ?? []);
-      setLoading(false);
-    });
-  }, []);
+    void load();
+  }, [load]);
 
   const term = q.trim().toLowerCase();
   const filtered = docs.filter((d) => {
@@ -108,7 +137,29 @@ function KnowledgePage() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Loading references…</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="rounded-xl border border-border bg-card p-6 animate-pulse space-y-3">
+              <div className="h-4 w-1/3 rounded-full bg-muted" />
+              <div className="h-3 w-full rounded-full bg-muted" />
+              <div className="h-3 w-4/5 rounded-full bg-muted" />
+            </div>
+          ))}
+        </div>
+      ) : error ? (
+        <div className="rounded-xl border border-destructive/40 bg-destructive/5 p-6 space-y-3">
+          <p className="text-sm text-foreground">{error}</p>
+          <button
+            onClick={() => void load()}
+            className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-xs font-medium hover:border-primary/50 transition-colors"
+          >
+            <RefreshCw className="size-3.5" /> Retry
+          </button>
+        </div>
+      ) : docs.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          The reference library is empty right now. Retry shortly.
+        </p>
       ) : groups.length === 0 ? (
         <p className="text-sm text-muted-foreground">
           No references match “{q}”. Try a crop name, a symptom, or a treatment.
